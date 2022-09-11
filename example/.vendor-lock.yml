@@ -1,0 +1,4 @@
+version: 0.0.1
+deps:
+  - url: https://github.com/alevinval/ledger
+    commit: 04abf50e06ae0dcf88e75cb35e922c7ae3aefad6

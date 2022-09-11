@@ -1,0 +1,7 @@
+version: 0.0.1
+vendor_dir: vendor/
+extensions:
+  - proto
+deps:
+  - url: https://github.com/alevinval/ledger
+    branch: master
