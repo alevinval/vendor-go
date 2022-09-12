@@ -13,7 +13,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var isDebugEnabled bool
+var (
+	isDebugEnabled bool
+	preset         string
+)
 
 var logger = log.GetLogger()
 
@@ -41,6 +44,7 @@ func newInitCmd() *cobra.Command {
 			}
 
 			spec := core.NewSpec()
+			spec.Preset = preset
 
 			err = saveFile(core.SPEC_FILENAME, spec)
 			if err != nil {
@@ -195,9 +199,13 @@ func saveFile(filename string, s YamlSerializable) error {
 }
 
 func NewVendorCmd() *cobra.Command {
-	var rootCmd = newRootCmd()
+	rootCmd := newRootCmd()
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
-	rootCmd.AddCommand(newInitCmd())
+
+	initCmd := newInitCmd()
+	initCmd.PersistentFlags().StringVarP(&preset, "preset", "p", "", "preset to use")
+
+	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(newAddCmd())
 	rootCmd.AddCommand(newInstallCmd())
 	rootCmd.AddCommand(newUpdateCmd())

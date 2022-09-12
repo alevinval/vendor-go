@@ -29,10 +29,12 @@ func NewSpecInstaller(cache string, spec *core.Spec, lock *core.SpecLock) *SpecI
 }
 
 func (s *SpecInstaller) Install() error {
+	s.spec.LoadPreset()
 	return s.run(InstallFn)
 }
 
 func (s *SpecInstaller) Update() error {
+	s.spec.LoadPreset()
 	return s.run(UpdateFn)
 }
 
