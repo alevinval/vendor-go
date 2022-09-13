@@ -1,4 +1,4 @@
-module vendor-go
+module github.com/alevinval/vendor-go
 
 go 1.19
 

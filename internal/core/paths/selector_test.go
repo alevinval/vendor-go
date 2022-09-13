@@ -2,7 +2,8 @@ package paths
 
 import (
 	"testing"
-	"vendor-go/internal/core"
+
+	"github.com/alevinval/vendor-go/internal/core"
 
 	"github.com/stretchr/testify/assert"
 )

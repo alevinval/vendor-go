@@ -1,7 +1,7 @@
 package core
 
 import (
-	"vendor-go/internal/core/log"
+	"github.com/alevinval/vendor-go/internal/core/log"
 
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"

@@ -2,7 +2,8 @@ package installers
 
 import (
 	"os"
-	"vendor-go/internal/core"
+
+	"github.com/alevinval/vendor-go/internal/core"
 )
 
 type SpecInstaller struct {

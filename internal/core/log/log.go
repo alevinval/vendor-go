@@ -10,7 +10,6 @@ var logger = log.New(os.Stderr)
 
 func init() {
 	logger.WithoutTimestamp()
-	// logger.WithDebug()
 }
 
 func GetLogger() *log.Logger {

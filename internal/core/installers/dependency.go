@@ -3,9 +3,10 @@ package installers
 import (
 	"fmt"
 	"io/fs"
-	"vendor-go/internal/core"
-	"vendor-go/internal/core/log"
-	"vendor-go/internal/core/paths"
+
+	"github.com/alevinval/vendor-go/internal/core"
+	"github.com/alevinval/vendor-go/internal/core/log"
+	"github.com/alevinval/vendor-go/internal/core/paths"
 )
 
 var logger = log.GetLogger()

@@ -3,7 +3,8 @@ package paths
 import (
 	"path/filepath"
 	"strings"
-	"vendor-go/internal/core"
+
+	"github.com/alevinval/vendor-go/internal/core"
 )
 
 type PathSelector struct {

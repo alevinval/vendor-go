@@ -7,7 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"vendor-go/internal/core/log"
+
+	"github.com/alevinval/vendor-go/internal/core/log"
 )
 
 var logger = log.GetLogger()
