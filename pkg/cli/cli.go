@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path"
@@ -20,10 +21,10 @@ var (
 
 var logger = log.GetLogger()
 
-func newRootCmd() *cobra.Command {
+func newRootCmd(commandName string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "vendor",
-		Short: "Vendor is a flexible and customizable vendoring tool",
+		Use:   commandName,
+		Short: fmt.Sprintf("%s is a flexible and customizable vendoring tool", commandName),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if isDebugEnabled {
 				log.EnableDebug()
@@ -35,7 +36,7 @@ func newRootCmd() *cobra.Command {
 func newInitCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
-		Short: "initialises vendor in the current directory",
+		Short: "initialises the current directory",
 		Run: func(cmd *cobra.Command, args []string) {
 			_, err := os.ReadFile(core.SPEC_FILENAME)
 			if err == nil {
@@ -60,7 +61,7 @@ func newInitCmd() *cobra.Command {
 func newAddCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "add [url] [branch]",
-		Short: "Adds a new dependency to the vendor spec",
+		Short: "Add a new dependency to the spec",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			url := args[0]
@@ -88,7 +89,7 @@ func newAddCmd() *cobra.Command {
 func newInstallCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "install",
-		Short: "Installs dependencies respectring the lock spec",
+		Short: "Installs dependencies respectring the lockfile",
 		Run: func(cmd *cobra.Command, args []string) {
 			spec, err := loadSpec()
 			if err != nil {
@@ -124,7 +125,7 @@ func newInstallCmd() *cobra.Command {
 func newUpdateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "update",
-		Short: "update dependencies respectring the spec",
+		Short: "update dependencies to the latest commit from the branch of the spec",
 		Run: func(cmd *cobra.Command, args []string) {
 			spec, err := loadSpec()
 			if err != nil {
@@ -198,8 +199,8 @@ func saveFile(filename string, s YamlSerializable) error {
 	return os.WriteFile(filename, s.ToYaml(), fs.ModePerm)
 }
 
-func NewVendorCmd() *cobra.Command {
-	rootCmd := newRootCmd()
+func NewVendorCmd(commandName string) *cobra.Command {
+	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
 
 	initCmd := newInitCmd()
@@ -213,5 +214,5 @@ func NewVendorCmd() *cobra.Command {
 }
 
 func Run() error {
-	return NewVendorCmd().Execute()
+	return NewVendorCmd("vendor").Execute()
 }
