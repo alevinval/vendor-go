@@ -15,16 +15,16 @@ import (
 )
 
 var (
-	isDebugEnabled bool
-	preset         string
-)
+	logger = log.GetLogger()
 
-var logger = log.GetLogger()
+	isDebugEnabled bool
+	preset         core.Preset = nil
+)
 
 func newRootCmd(commandName string) *cobra.Command {
 	return &cobra.Command{
 		Use:   commandName,
-		Short: fmt.Sprintf("%s is a flexible and customizable vendoring tool", commandName),
+		Short: fmt.Sprintf("[%s] %s is a flexible and customizable vendoring tool", core.VERSION, commandName),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if isDebugEnabled {
 				log.EnableDebug()
@@ -33,7 +33,7 @@ func newRootCmd(commandName string) *cobra.Command {
 	}
 }
 
-func newInitCmd() *cobra.Command {
+func newInitCmd(preset core.Preset) *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
 		Short: "initialises the current directory",
@@ -58,7 +58,7 @@ func newInitCmd() *cobra.Command {
 	}
 }
 
-func newAddCmd() *cobra.Command {
+func newAddCmd(preset core.Preset) *cobra.Command {
 	return &cobra.Command{
 		Use:   "add [url] [branch]",
 		Short: "Add a new dependency to the spec",
@@ -67,7 +67,7 @@ func newAddCmd() *cobra.Command {
 			url := args[0]
 			branch := args[1]
 
-			spec, err := loadSpec()
+			spec, err := loadSpec(preset)
 			if err != nil {
 				return
 			}
@@ -86,12 +86,12 @@ func newAddCmd() *cobra.Command {
 	}
 }
 
-func newInstallCmd() *cobra.Command {
+func newInstallCmd(preset core.Preset) *cobra.Command {
 	return &cobra.Command{
 		Use:   "install",
 		Short: "Installs dependencies respectring the lockfile",
 		Run: func(cmd *cobra.Command, args []string) {
-			spec, err := loadSpec()
+			spec, err := loadSpec(preset)
 			if err != nil {
 				return
 			}
@@ -122,12 +122,12 @@ func newInstallCmd() *cobra.Command {
 	}
 }
 
-func newUpdateCmd() *cobra.Command {
+func newUpdateCmd(preset core.Preset) *cobra.Command {
 	return &cobra.Command{
 		Use:   "update",
 		Short: "update dependencies to the latest commit from the branch of the spec",
 		Run: func(cmd *cobra.Command, args []string) {
-			spec, err := loadSpec()
+			spec, err := loadSpec(preset)
 			if err != nil {
 				return
 			}
@@ -158,7 +158,7 @@ func newUpdateCmd() *cobra.Command {
 	}
 }
 
-func loadSpec() (*core.Spec, error) {
+func loadSpec(preset core.Preset) (*core.Spec, error) {
 	data, err := os.ReadFile(core.SPEC_FILENAME)
 	if err != nil {
 		logger.Warnf("cannot read %s: %s", core.SPEC_FILENAME, err)
@@ -172,6 +172,7 @@ func loadSpec() (*core.Spec, error) {
 		return nil, err
 	}
 
+	spec.Preset = preset
 	return spec, nil
 }
 
@@ -199,20 +200,17 @@ func saveFile(filename string, s YamlSerializable) error {
 	return os.WriteFile(filename, s.ToYaml(), fs.ModePerm)
 }
 
-func NewVendorCmd(commandName string) *cobra.Command {
+func NewVendorCmd(commandName string, preset core.Preset) *cobra.Command {
 	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
 
-	initCmd := newInitCmd()
-	initCmd.PersistentFlags().StringVarP(&preset, "preset", "p", "", "preset to use")
-
-	rootCmd.AddCommand(initCmd)
-	rootCmd.AddCommand(newAddCmd())
-	rootCmd.AddCommand(newInstallCmd())
-	rootCmd.AddCommand(newUpdateCmd())
+	rootCmd.AddCommand(newInitCmd(preset))
+	rootCmd.AddCommand(newAddCmd(preset))
+	rootCmd.AddCommand(newInstallCmd(preset))
+	rootCmd.AddCommand(newUpdateCmd(preset))
 	return rootCmd
 }
 
 func Run() error {
-	return NewVendorCmd("vendor").Execute()
+	return NewVendorCmd("vendor", nil).Execute()
 }

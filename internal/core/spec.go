@@ -10,12 +10,12 @@ const SPEC_LOCK_FILENAME = ".vendor-lock.yml"
 
 type Spec struct {
 	Version    string
-	Preset     string        `yaml:"preset,omitempty"`
 	VendorDir  string        `yaml:"vendor_dir,omitempty"`
 	Extensions []string      `yaml:"extensions,omitempty"`
 	Targets    []string      `yaml:"targets,omitempty"`
 	Ignores    []string      `yaml:"ignores,omitempty"`
 	Deps       []*Dependency `yaml:"deps"`
+	Preset     Preset        `yaml:"-"`
 }
 
 func NewSpec() *Spec {
@@ -28,6 +28,7 @@ func NewSpec() *Spec {
 		Deps:       []*Dependency{},
 	}
 }
+
 func (s *Spec) Add(dependency *Dependency) {
 	if dep, ok := s.findDep(dependency); ok {
 		dep.Update(dependency)
@@ -41,13 +42,12 @@ func (s *Spec) ToYaml() []byte {
 }
 
 func (s *Spec) LoadPreset() {
-	if s.Preset == "" {
+	if s.Preset == nil {
 		return
 	}
-	preset := presets[s.Preset]
-	s.Extensions = preset.GetExtensions()
+	s.Extensions = s.Preset.GetExtensions()
 	for _, dep := range s.Deps {
-		dep.Targets = preset.GetTargets(dep)
+		dep.Targets = s.Preset.GetTargets(dep)
 	}
 }
 
