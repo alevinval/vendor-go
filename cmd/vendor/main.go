@@ -3,6 +3,7 @@ package main
 import (
 	"io/fs"
 	"os"
+	"path"
 	"vendor-go/internal/core"
 	"vendor-go/internal/core/installers"
 	"vendor-go/internal/core/log"
@@ -87,8 +88,8 @@ var InstallCmd = &cobra.Command{
 			return
 		}
 
-		cache := os.TempDir()
-		logger.Debugf("repository cache located at %s", cache)
+		cache := path.Join(os.TempDir(), "vendor-go-cache")
+		logger.Infof("repository cache located at %s", cache)
 
 		m := installers.NewSpecInstaller(cache, spec, specLock)
 		err = m.Install()
@@ -121,8 +122,8 @@ var UpdateCmd = &cobra.Command{
 			return
 		}
 
-		cache := os.TempDir()
-		logger.Debugf("repository cache located at %s", cache)
+		cache := path.Join(os.TempDir(), "vendor-go-cache")
+		logger.Infof("repository cache located at %s", cache)
 
 		m := installers.NewSpecInstaller(cache, spec, specLock)
 		err = m.Update()
