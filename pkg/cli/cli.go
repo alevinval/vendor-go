@@ -33,21 +33,21 @@ func newRootCmd(commandName string) *cobra.Command {
 	}
 }
 
-func newInitCmd(preset core.Preset) *cobra.Command {
+func newInitCmd(wrapper *core.PresetWrapper) *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
 		Short: "initialises the current directory",
 		Run: func(cmd *cobra.Command, args []string) {
-			_, err := os.ReadFile(core.SPEC_FILENAME)
+			_, err := os.ReadFile(wrapper.GetSpecFilename())
 			if err == nil {
 				logger.Warnf("%s already exists", core.SPEC_FILENAME)
 				return
 			}
 
 			spec := core.NewSpec()
-			spec.Preset = preset
+			spec.Preset = wrapper.Preset
 
-			err = saveFile(core.SPEC_FILENAME, spec)
+			err = saveSpec(wrapper, spec)
 			if err != nil {
 				logger.Errorf("failed initializing: %s", err)
 				return
@@ -58,7 +58,7 @@ func newInitCmd(preset core.Preset) *cobra.Command {
 	}
 }
 
-func newAddCmd(preset core.Preset) *cobra.Command {
+func newAddCmd(wrapper *core.PresetWrapper) *cobra.Command {
 	return &cobra.Command{
 		Use:   "add [url] [branch]",
 		Short: "Add a new dependency to the spec",
@@ -67,7 +67,7 @@ func newAddCmd(preset core.Preset) *cobra.Command {
 			url := args[0]
 			branch := args[1]
 
-			spec, err := loadSpec(preset)
+			spec, err := loadSpec(wrapper)
 			if err != nil {
 				return
 			}
@@ -75,7 +75,7 @@ func newAddCmd(preset core.Preset) *cobra.Command {
 			dep := core.NewDependency(url, branch)
 			spec.Add(dep)
 
-			err = saveFile(core.SPEC_FILENAME, spec)
+			err = saveSpec(wrapper, spec)
 			if err != nil {
 				logger.Errorf("failed adding dependency: %s", err)
 				return
@@ -86,17 +86,17 @@ func newAddCmd(preset core.Preset) *cobra.Command {
 	}
 }
 
-func newInstallCmd(preset core.Preset) *cobra.Command {
+func newInstallCmd(wrapper *core.PresetWrapper) *cobra.Command {
 	return &cobra.Command{
 		Use:   "install",
 		Short: "Installs dependencies respectring the lockfile",
 		Run: func(cmd *cobra.Command, args []string) {
-			spec, err := loadSpec(preset)
+			spec, err := loadSpec(wrapper)
 			if err != nil {
 				return
 			}
 
-			specLock, err := loadSpecLock()
+			specLock, err := loadSpecLock(wrapper)
 			if err != nil {
 				return
 			}
@@ -111,7 +111,7 @@ func newInstallCmd(preset core.Preset) *cobra.Command {
 				return
 			}
 
-			err = saveFile(core.SPEC_LOCK_FILENAME, specLock)
+			err = saveSpecLock(wrapper, specLock)
 			if err != nil {
 				logger.Errorf("install failed: %s", err)
 				return
@@ -122,17 +122,17 @@ func newInstallCmd(preset core.Preset) *cobra.Command {
 	}
 }
 
-func newUpdateCmd(preset core.Preset) *cobra.Command {
+func newUpdateCmd(wrapper *core.PresetWrapper) *cobra.Command {
 	return &cobra.Command{
 		Use:   "update",
 		Short: "update dependencies to the latest commit from the branch of the spec",
 		Run: func(cmd *cobra.Command, args []string) {
-			spec, err := loadSpec(preset)
+			spec, err := loadSpec(wrapper)
 			if err != nil {
 				return
 			}
 
-			specLock, err := loadSpecLock()
+			specLock, err := loadSpecLock(wrapper)
 			if err != nil {
 				return
 			}
@@ -147,7 +147,7 @@ func newUpdateCmd(preset core.Preset) *cobra.Command {
 				return
 			}
 
-			err = saveFile(core.SPEC_LOCK_FILENAME, specLock)
+			err = saveSpecLock(wrapper, specLock)
 			if err != nil {
 				logger.Errorf("update failed: %s", err)
 				return
@@ -158,10 +158,10 @@ func newUpdateCmd(preset core.Preset) *cobra.Command {
 	}
 }
 
-func loadSpec(preset core.Preset) (*core.Spec, error) {
-	data, err := os.ReadFile(core.SPEC_FILENAME)
+func loadSpec(pw *core.PresetWrapper) (*core.Spec, error) {
+	data, err := os.ReadFile(pw.GetSpecFilename())
 	if err != nil {
-		logger.Warnf("cannot read %s: %s", core.SPEC_FILENAME, err)
+		logger.Warnf("cannot read %s: %s", pw.GetSpecFilename(), err)
 		return nil, err
 	}
 
@@ -172,12 +172,12 @@ func loadSpec(preset core.Preset) (*core.Spec, error) {
 		return nil, err
 	}
 
-	spec.Preset = preset
+	spec.Preset = pw.Preset
 	return spec, nil
 }
 
-func loadSpecLock() (*core.SpecLock, error) {
-	data, err := os.ReadFile(core.SPEC_LOCK_FILENAME)
+func loadSpecLock(pw *core.PresetWrapper) (*core.SpecLock, error) {
+	data, err := os.ReadFile(pw.GetSpecLockFilename())
 	if err != nil {
 		return core.NewSpecLock(), nil
 	}
@@ -185,7 +185,7 @@ func loadSpecLock() (*core.SpecLock, error) {
 	spec := core.NewSpecLock()
 	err = yaml.Unmarshal(data, spec)
 	if err != nil {
-		logger.Errorf("cannot read %s: %s", core.SPEC_LOCK_FILENAME, err)
+		logger.Errorf("cannot read %s: %s", pw.GetSpecLockFilename(), err)
 		return nil, err
 	}
 
@@ -196,6 +196,14 @@ type YamlSerializable interface {
 	ToYaml() []byte
 }
 
+func saveSpec(wrapper *core.PresetWrapper, spec *core.Spec) error {
+	return saveFile(wrapper.GetSpecFilename(), spec)
+}
+
+func saveSpecLock(wrapper *core.PresetWrapper, specLock *core.SpecLock) error {
+	return saveFile(wrapper.GetSpecLockFilename(), specLock)
+}
+
 func saveFile(filename string, s YamlSerializable) error {
 	return os.WriteFile(filename, s.ToYaml(), fs.ModePerm)
 }
@@ -204,10 +212,11 @@ func NewVendorCmd(commandName string, preset core.Preset) *cobra.Command {
 	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
 
-	rootCmd.AddCommand(newInitCmd(preset))
-	rootCmd.AddCommand(newAddCmd(preset))
-	rootCmd.AddCommand(newInstallCmd(preset))
-	rootCmd.AddCommand(newUpdateCmd(preset))
+	wrapper := core.WrapPreset(preset)
+	rootCmd.AddCommand(newInitCmd(wrapper))
+	rootCmd.AddCommand(newAddCmd(wrapper))
+	rootCmd.AddCommand(newInstallCmd(wrapper))
+	rootCmd.AddCommand(newUpdateCmd(wrapper))
 	return rootCmd
 }
 
