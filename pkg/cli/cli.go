@@ -6,9 +6,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/alevinval/vendor-go/internal/core"
-	"github.com/alevinval/vendor-go/internal/core/installers"
-	"github.com/alevinval/vendor-go/internal/core/log"
+	"github.com/alevinval/vendor-go/pkg/core"
+	"github.com/alevinval/vendor-go/pkg/core/installers"
+	"github.com/alevinval/vendor-go/pkg/core/log"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"

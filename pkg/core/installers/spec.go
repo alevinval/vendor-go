@@ -3,7 +3,7 @@ package installers
 import (
 	"os"
 
-	"github.com/alevinval/vendor-go/internal/core"
+	"github.com/alevinval/vendor-go/pkg/core"
 	"github.com/fatih/color"
 )
 

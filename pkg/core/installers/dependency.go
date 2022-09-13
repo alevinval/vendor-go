@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io/fs"
 
-	"github.com/alevinval/vendor-go/internal/core"
-	"github.com/alevinval/vendor-go/internal/core/log"
-	"github.com/alevinval/vendor-go/internal/core/paths"
+	"github.com/alevinval/vendor-go/pkg/core"
+	"github.com/alevinval/vendor-go/pkg/core/log"
+	"github.com/alevinval/vendor-go/pkg/core/paths"
 	"github.com/fatih/color"
 )
 
