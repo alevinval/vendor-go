@@ -7,6 +7,7 @@ import (
 	"github.com/alevinval/vendor-go/internal/core"
 	"github.com/alevinval/vendor-go/internal/core/log"
 	"github.com/alevinval/vendor-go/internal/core/paths"
+	"github.com/fatih/color"
 )
 
 var logger = log.GetLogger()
@@ -37,10 +38,10 @@ func (d *DependencyInstaller) Install() (*core.DependencyLock, error) {
 	}
 
 	if d.depLock != nil {
-		logger.Infof("installing %s@%s", d.dep.URL, d.depLock.Commit)
+		logger.Infof("installing %s", color.CyanString(d.dep.URL))
 		d.repo.CheckoutCommit(d.depLock.Commit)
 	} else {
-		logger.Infof("installing %s@%s", d.dep.URL, d.dep.Branch)
+		logger.Infof("installing %s@%s", color.CyanString(d.dep.URL), color.YellowString(d.dep.Branch))
 		d.repo.CheckoutBranch(d.dep.Branch)
 		d.repo.Pull()
 	}
@@ -54,7 +55,7 @@ func (d *DependencyInstaller) Update() (*core.DependencyLock, error) {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
 	}
 
-	logger.Infof("updating %s@%s", d.dep.URL, d.dep.Branch)
+	logger.Infof("updating %s@%s", color.CyanString("%s", d.dep.URL), color.YellowString(d.dep.Branch))
 
 	d.repo.Fetch()
 	d.repo.CheckoutBranch(d.dep.Branch)

@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/alevinval/vendor-go/internal/core"
+	"github.com/fatih/color"
 )
 
 type SpecInstaller struct {
@@ -51,6 +52,7 @@ func (s *SpecInstaller) run(action func(*DependencyInstaller) (*core.DependencyL
 			return err
 		}
 
+		logger.Infof("  🔒 %s", color.YellowString(newLock.Commit))
 		s.lock.Add(newLock)
 	}
 
