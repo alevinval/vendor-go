@@ -1,21 +1,23 @@
-package core
+package internal
 
 import (
 	"io/fs"
 	"path/filepath"
+
+	"github.com/alevinval/vendor-go/pkg/core"
 )
 
 type Repository struct {
+	dep  *core.Dependency
+	git  *Git
 	path string
-	dep  *Dependency
-	Git  *Git
 }
 
-func NewRepository(cache string, dep *Dependency) *Repository {
+func NewRepository(cache string, dep *core.Dependency) *Repository {
 	return &Repository{
 		path: filepath.Join(cache, dep.ID()),
 		dep:  dep,
-		Git:  &Git{},
+		git:  &Git{},
 	}
 }
 
@@ -24,27 +26,27 @@ func (r *Repository) Path() string {
 }
 
 func (r *Repository) CheckoutCommit(commit string) error {
-	return r.Git.CheckoutCommit(commit, r.path)
+	return r.git.CheckoutCommit(commit, r.path)
 }
 
 func (r *Repository) CheckoutBranch(branch string) error {
-	return r.Git.CheckoutBranch(branch, r.path)
+	return r.git.CheckoutBranch(branch, r.path)
 }
 
 func (r *Repository) Pull() error {
-	return r.Git.Pull(r.path)
+	return r.git.Pull(r.path)
 }
 
 func (r *Repository) Fetch() error {
-	return r.Git.Fetch(r.path)
+	return r.git.Fetch(r.path)
 }
 
 func (r *Repository) GetCurrentCommit() (string, error) {
-	return r.Git.GetCurrentCommit(r.path)
+	return r.git.GetCurrentCommit(r.path)
 }
 
 func (r *Repository) Ensure() error {
-	return r.Git.OpenOrClone(r.dep.URL, r.dep.Branch, r.path)
+	return r.git.OpenOrClone(r.dep.URL, r.dep.Branch, r.path)
 }
 
 func (r *Repository) WalkDir(fn fs.WalkDirFunc) error {

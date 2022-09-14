@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/alevinval/vendor-go/internal"
 	"github.com/alevinval/vendor-go/pkg/core"
 	"github.com/alevinval/vendor-go/pkg/core/installers"
 	"github.com/alevinval/vendor-go/pkg/core/log"
@@ -33,7 +34,7 @@ func newRootCmd(commandName string) *cobra.Command {
 	}
 }
 
-func newInitCmd(wrapper *core.PresetWrapper) *cobra.Command {
+func newInitCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
 		Short: "initialises the current directory",
@@ -58,7 +59,7 @@ func newInitCmd(wrapper *core.PresetWrapper) *cobra.Command {
 	}
 }
 
-func newAddCmd(wrapper *core.PresetWrapper) *cobra.Command {
+func newAddCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 	return &cobra.Command{
 		Use:   "add [url] [branch]",
 		Short: "Add a new dependency to the spec",
@@ -86,7 +87,7 @@ func newAddCmd(wrapper *core.PresetWrapper) *cobra.Command {
 	}
 }
 
-func newInstallCmd(wrapper *core.PresetWrapper) *cobra.Command {
+func newInstallCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 	return &cobra.Command{
 		Use:   "install",
 		Short: "Installs dependencies respectring the lockfile",
@@ -104,7 +105,7 @@ func newInstallCmd(wrapper *core.PresetWrapper) *cobra.Command {
 			cache := path.Join(os.TempDir(), "vendor-go-cache")
 			logger.Infof("repository cache located at %s", cache)
 
-			m := installers.NewSpecInstaller(cache, spec, specLock)
+			m := installers.NewInstaller(cache, spec, specLock)
 			err = m.Install()
 			if err != nil {
 				logger.Errorf("install failed: %s", err)
@@ -122,7 +123,7 @@ func newInstallCmd(wrapper *core.PresetWrapper) *cobra.Command {
 	}
 }
 
-func newUpdateCmd(wrapper *core.PresetWrapper) *cobra.Command {
+func newUpdateCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 	return &cobra.Command{
 		Use:   "update",
 		Short: "update dependencies to the latest commit from the branch of the spec",
@@ -140,7 +141,7 @@ func newUpdateCmd(wrapper *core.PresetWrapper) *cobra.Command {
 			cache := path.Join(os.TempDir(), "vendor-go-cache")
 			logger.Infof("repository cache located at %s", cache)
 
-			m := installers.NewSpecInstaller(cache, spec, specLock)
+			m := installers.NewInstaller(cache, spec, specLock)
 			err = m.Update()
 			if err != nil {
 				logger.Errorf("update failed: %s", err)
@@ -158,7 +159,7 @@ func newUpdateCmd(wrapper *core.PresetWrapper) *cobra.Command {
 	}
 }
 
-func loadSpec(pw *core.PresetWrapper) (*core.Spec, error) {
+func loadSpec(pw *internal.PresetWrapper) (*core.Spec, error) {
 	data, err := os.ReadFile(pw.GetSpecFilename())
 	if err != nil {
 		logger.Warnf("cannot read %s: %s", pw.GetSpecFilename(), err)
@@ -176,7 +177,7 @@ func loadSpec(pw *core.PresetWrapper) (*core.Spec, error) {
 	return spec, nil
 }
 
-func loadSpecLock(pw *core.PresetWrapper) (*core.SpecLock, error) {
+func loadSpecLock(pw *internal.PresetWrapper) (*core.SpecLock, error) {
 	data, err := os.ReadFile(pw.GetSpecLockFilename())
 	if err != nil {
 		return core.NewSpecLock(), nil
@@ -196,11 +197,11 @@ type YamlSerializable interface {
 	ToYaml() []byte
 }
 
-func saveSpec(wrapper *core.PresetWrapper, spec *core.Spec) error {
+func saveSpec(wrapper *internal.PresetWrapper, spec *core.Spec) error {
 	return saveFile(wrapper.GetSpecFilename(), spec)
 }
 
-func saveSpecLock(wrapper *core.PresetWrapper, specLock *core.SpecLock) error {
+func saveSpecLock(wrapper *internal.PresetWrapper, specLock *core.SpecLock) error {
 	return saveFile(wrapper.GetSpecLockFilename(), specLock)
 }
 
@@ -212,7 +213,7 @@ func NewVendorCmd(commandName string, preset core.Preset) *cobra.Command {
 	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
 
-	wrapper := core.WrapPreset(preset)
+	wrapper := internal.WrapPreset(preset)
 	rootCmd.AddCommand(newInitCmd(wrapper))
 	rootCmd.AddCommand(newAddCmd(wrapper))
 	rootCmd.AddCommand(newInstallCmd(wrapper))

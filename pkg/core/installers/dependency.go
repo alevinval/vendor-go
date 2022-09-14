@@ -4,26 +4,27 @@ import (
 	"fmt"
 	"io/fs"
 
+	"github.com/alevinval/vendor-go/internal"
+	"github.com/alevinval/vendor-go/internal/paths"
 	"github.com/alevinval/vendor-go/pkg/core"
 	"github.com/alevinval/vendor-go/pkg/core/log"
-	"github.com/alevinval/vendor-go/pkg/core/paths"
 	"github.com/fatih/color"
 )
 
 var logger = log.GetLogger()
 
-type DependencyInstaller struct {
+type dependencyInstaller struct {
 	dep           *core.Dependency
 	depLock       *core.DependencyLock
-	repo          *core.Repository
+	repo          *internal.Repository
 	importFilesFn fs.WalkDirFunc
 }
 
-func NewDependencyInstaller(spec *core.Spec, dep *core.Dependency, depLock *core.DependencyLock, repo *core.Repository) *DependencyInstaller {
+func newDependencyInstaller(spec *core.Spec, dep *core.Dependency, depLock *core.DependencyLock, repo *internal.Repository) *dependencyInstaller {
 	selector := paths.NewPathSelector(spec, dep)
 	importFilesFn := paths.ImportFileFunc(selector, repo.Path(), spec.VendorDir)
 
-	return &DependencyInstaller{
+	return &dependencyInstaller{
 		dep:           dep,
 		depLock:       depLock,
 		repo:          repo,
@@ -31,7 +32,7 @@ func NewDependencyInstaller(spec *core.Spec, dep *core.Dependency, depLock *core
 	}
 }
 
-func (d *DependencyInstaller) Install() (*core.DependencyLock, error) {
+func (d *dependencyInstaller) Install() (*core.DependencyLock, error) {
 	err := d.repo.Ensure()
 	if err != nil {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
@@ -49,7 +50,7 @@ func (d *DependencyInstaller) Install() (*core.DependencyLock, error) {
 	return d.importFiles()
 }
 
-func (d *DependencyInstaller) Update() (*core.DependencyLock, error) {
+func (d *dependencyInstaller) Update() (*core.DependencyLock, error) {
 	err := d.repo.Ensure()
 	if err != nil {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
@@ -64,7 +65,7 @@ func (d *DependencyInstaller) Update() (*core.DependencyLock, error) {
 	return d.importFiles()
 }
 
-func (d *DependencyInstaller) importFiles() (*core.DependencyLock, error) {
+func (d *dependencyInstaller) importFiles() (*core.DependencyLock, error) {
 	err := d.repo.WalkDir(d.importFilesFn)
 	if err != nil {
 		return nil, fmt.Errorf("cannot import files: %s", err)
