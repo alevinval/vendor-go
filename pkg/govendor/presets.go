@@ -6,6 +6,7 @@ var _ Preset = (*DefaultPreset)(nil)
 // It allows customizing anything you need, like the names of the spec and
 // lock file, also allows customizing the targeted and ignored paths.
 type Preset interface {
+	GetPresetName() string
 	GetSpecFilename() string
 	GetSpecLockFilename() string
 	GetExtensions() []string
@@ -15,6 +16,10 @@ type Preset interface {
 
 // DefaultPreset provides the default configuration for the vendor library.
 type DefaultPreset struct{}
+
+func (dp *DefaultPreset) GetPresetName() string {
+	return "default"
+}
 
 func (dp *DefaultPreset) GetSpecFilename() string {
 	return SPEC_FILENAME
