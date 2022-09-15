@@ -30,8 +30,7 @@ func (tp *TestPreset) GetIgnores(dep *Dependency) []string {
 func TestNewSpec_LoadsPreset(t *testing.T) {
 	spec := NewSpec(&TestPreset{})
 
-	assert.Equal(t, ".vendor.yml", spec.Preset.GetSpecFilename())
-	assert.Equal(t, ".vendor-lock.yml", spec.Preset.GetSpecLockFilename())
+	assert.Equal(t, &TestPreset{}, spec.preset)
 	assert.Equal(t, []string{"java", "md"}, spec.Extensions)
 	assert.Equal(t, []string{}, spec.Targets)
 	assert.Equal(t, []string{}, spec.Ignores)

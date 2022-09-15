@@ -1,4 +1,5 @@
 version: 0.0.1
+preset: default
 vendor_dir: vendor/
 extensions:
   - proto

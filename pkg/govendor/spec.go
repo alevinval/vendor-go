@@ -19,12 +19,13 @@ var logger = log.GetLogger()
 
 type Spec struct {
 	Version    string
+	Preset     string        `yaml:"preset"`
 	VendorDir  string        `yaml:"vendor_dir,omitempty"`
 	Extensions []string      `yaml:"extensions,omitempty"`
 	Targets    []string      `yaml:"targets,omitempty"`
 	Ignores    []string      `yaml:"ignores,omitempty"`
 	Deps       []*Dependency `yaml:"deps"`
-	Preset     Preset        `yaml:"-"`
+	preset     Preset        `yaml:"-"`
 }
 
 func LoadSpec(preset Preset) (*Spec, error) {
@@ -74,7 +75,7 @@ func (s *Spec) Add(dependency *Dependency) {
 	} else {
 		s.Deps = append(s.Deps, dependency)
 	}
-	s.applyPreset(s.Preset)
+	s.applyPreset(s.preset)
 }
 
 func (s *Spec) Save() error {
@@ -83,15 +84,16 @@ func (s *Spec) Save() error {
 		return err
 	}
 
-	return os.WriteFile(s.Preset.GetSpecFilename(), data, os.ModePerm)
+	return os.WriteFile(s.preset.GetSpecFilename(), data, os.ModePerm)
 }
 
 func (s *Spec) applyPreset(preset Preset) {
-	s.Preset = preset
-	s.Extensions = utils.Union(s.Extensions, s.Preset.GetExtensions())
+	s.preset = preset
+	s.Preset = preset.GetPresetName()
+	s.Extensions = utils.Union(s.Extensions, s.preset.GetExtensions())
 	for _, dep := range s.Deps {
-		dep.Targets = utils.Union(dep.Targets, s.Preset.GetTargets(dep))
-		dep.Ignores = utils.Union(dep.Ignores, s.Preset.GetIgnores(dep))
+		dep.Targets = utils.Union(dep.Targets, s.preset.GetTargets(dep))
+		dep.Ignores = utils.Union(dep.Ignores, s.preset.GetIgnores(dep))
 	}
 }
 
