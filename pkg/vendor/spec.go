@@ -1,10 +1,10 @@
-package govendor
+package vendor
 
 import (
 	"os"
 	"strings"
 
-	"github.com/alevinval/vendor-go/pkg/govendor/log"
+	"github.com/alevinval/vendor-go/internal/log"
 	"gopkg.in/yaml.v3"
 )
 

@@ -4,17 +4,17 @@ import (
 	"os"
 
 	"github.com/alevinval/vendor-go/internal"
-	"github.com/alevinval/vendor-go/pkg/govendor"
+	"github.com/alevinval/vendor-go/pkg/vendor"
 	"github.com/fatih/color"
 )
 
 type Installer struct {
-	spec      *govendor.Spec
-	lock      *govendor.SpecLock
+	spec      *vendor.Spec
+	lock      *vendor.SpecLock
 	cacheRoot string
 }
 
-func NewInstaller(cache string, spec *govendor.Spec, lock *govendor.SpecLock) *Installer {
+func NewInstaller(cache string, spec *vendor.Spec, lock *vendor.SpecLock) *Installer {
 	return &Installer{
 		cacheRoot: cache,
 		spec:      spec,
@@ -55,12 +55,12 @@ func resetVendorPath(vendorPath string) {
 	os.MkdirAll(vendorPath, os.ModePerm)
 }
 
-type actionFunc = func(*dependencyInstaller) (*govendor.DependencyLock, error)
+type actionFunc = func(*dependencyInstaller) (*vendor.DependencyLock, error)
 
-func installFunc(installer *dependencyInstaller) (*govendor.DependencyLock, error) {
+func installFunc(installer *dependencyInstaller) (*vendor.DependencyLock, error) {
 	return installer.Install()
 }
 
-func updateFunc(installer *dependencyInstaller) (*govendor.DependencyLock, error) {
+func updateFunc(installer *dependencyInstaller) (*vendor.DependencyLock, error) {
 	return installer.Update()
 }

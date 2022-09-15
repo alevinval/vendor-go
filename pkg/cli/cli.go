@@ -6,9 +6,9 @@ import (
 	"path"
 
 	"github.com/alevinval/vendor-go/internal"
-	"github.com/alevinval/vendor-go/pkg/govendor"
-	"github.com/alevinval/vendor-go/pkg/govendor/installers"
-	"github.com/alevinval/vendor-go/pkg/govendor/log"
+	"github.com/alevinval/vendor-go/internal/installers"
+	"github.com/alevinval/vendor-go/internal/log"
+	"github.com/alevinval/vendor-go/pkg/vendor"
 
 	"github.com/spf13/cobra"
 )
@@ -22,7 +22,7 @@ var (
 func newRootCmd(commandName string) *cobra.Command {
 	return &cobra.Command{
 		Use:   commandName,
-		Short: fmt.Sprintf("[%s] %s is a flexible and customizable vendoring tool", govendor.VERSION, commandName),
+		Short: fmt.Sprintf("[%s] %s is a flexible and customizable vendoring tool", vendor.VERSION, commandName),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if isDebugEnabled {
 				log.EnableDebug()
@@ -38,7 +38,7 @@ func newInitCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			_, err := os.ReadFile(wrapper.GetSpecFilename())
 			if err == nil {
-				logger.Warnf("%s already exists", govendor.SPEC_FILENAME)
+				logger.Warnf("%s already exists", vendor.SPEC_FILENAME)
 				return
 			}
 
@@ -50,7 +50,7 @@ func newInitCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 				return
 			}
 
-			logger.Infof("%s has been created", govendor.SPEC_FILENAME)
+			logger.Infof("%s has been created", vendor.SPEC_FILENAME)
 		},
 	}
 }
@@ -69,7 +69,7 @@ func newAddCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 				return
 			}
 
-			dep := govendor.NewDependency(url, branch)
+			dep := vendor.NewDependency(url, branch)
 			spec.Add(dep)
 
 			spec.Save()
@@ -167,7 +167,7 @@ func newUpdateCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 	}
 }
 
-func NewVendorCmd(commandName string, preset govendor.Preset) *cobra.Command {
+func NewVendorCmd(commandName string, preset vendor.Preset) *cobra.Command {
 	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
 
