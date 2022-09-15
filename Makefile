@@ -39,7 +39,7 @@ endif
 
 .PHONY: format
 format:
-	yq -i .github/workflows/ci.yml
+	yq -i .github/workflows/test.yml
 	for _file in $$(gofmt -s -l . | grep -vE '^vendor/'); do \
 		gofmt -s -w $$_file ; \
 	done
