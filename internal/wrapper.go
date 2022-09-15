@@ -11,13 +11,13 @@ func WrapPreset(preset govendor.Preset) *PresetWrapper {
 }
 
 func (w *PresetWrapper) LoadSpec() (*govendor.Spec, error) {
-	return govendor.LoadSpec(w)
+	return govendor.LoadSpec(w.Preset)
 }
 
 func (w *PresetWrapper) LoadSpecLock() (*govendor.SpecLock, error) {
-	return govendor.LoadSpecLock(w)
+	return govendor.LoadSpecLock(w.Preset)
 }
 
 func (w *PresetWrapper) NewSpec() *govendor.Spec {
-	return govendor.NewSpec(w)
+	return govendor.NewSpec(w.Preset)
 }

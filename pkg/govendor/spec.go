@@ -29,10 +29,7 @@ type Spec struct {
 }
 
 func LoadSpec(preset Preset) (*Spec, error) {
-	if preset == nil {
-		logger.Warnf("no preset has been provided, using default preset")
-		preset = &DefaultPreset{}
-	}
+	preset = checkPreset(preset)
 
 	data, err := os.ReadFile(preset.GetSpecFilename())
 	if err != nil {
@@ -52,10 +49,7 @@ func LoadSpec(preset Preset) (*Spec, error) {
 }
 
 func NewSpec(preset Preset) *Spec {
-	if preset == nil {
-		logger.Warnf("no preset has been provided, using default preset")
-		preset = &DefaultPreset{}
-	}
+	preset = checkPreset(preset)
 
 	spec := &Spec{
 		Version:    VERSION,
@@ -104,4 +98,22 @@ func (s *Spec) findDep(dependency *Dependency) (*Dependency, bool) {
 		}
 	}
 	return nil, false
+}
+
+func checkPreset(preset Preset) Preset {
+	if preset == nil {
+		logger.Warnf("no preset has been provided, using default preset")
+		return &DefaultPreset{}
+	}
+
+	switch p := preset.(type) {
+	case *DefaultPreset:
+		break
+	default:
+		if p.GetPresetName() == "default" {
+			logger.Warnf("custom preset injected, but the name is \"default\" which is used for the default preset name, this will be confusing for users, consider a different name for your preset")
+		}
+	}
+
+	return preset
 }
