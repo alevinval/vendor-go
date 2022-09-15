@@ -178,7 +178,3 @@ func NewVendorCmd(commandName string, preset govendor.Preset) *cobra.Command {
 	rootCmd.AddCommand(newUpdateCmd(wrapper))
 	return rootCmd
 }
-
-func Run() error {
-	return NewVendorCmd("vendor", nil).Execute()
-}

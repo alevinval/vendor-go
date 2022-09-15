@@ -4,13 +4,16 @@ import (
 	"os"
 	"strings"
 
+	"github.com/alevinval/vendor-go/internal/utils"
 	"github.com/alevinval/vendor-go/pkg/govendor/log"
 	"gopkg.in/yaml.v3"
 )
 
-const VERSION = "0.1.0"
-const SPEC_FILENAME = ".vendor.yml"
-const SPEC_LOCK_FILENAME = ".vendor-lock.yml"
+const (
+	VERSION            = "0.1.0"
+	SPEC_FILENAME      = ".vendor.yml"
+	SPEC_LOCK_FILENAME = ".vendor-lock.yml"
+)
 
 var logger = log.GetLogger()
 
@@ -25,6 +28,11 @@ type Spec struct {
 }
 
 func LoadSpec(preset Preset) (*Spec, error) {
+	if preset == nil {
+		logger.Warnf("no preset has been provided, using default preset")
+		preset = &DefaultPreset{}
+	}
+
 	data, err := os.ReadFile(preset.GetSpecFilename())
 	if err != nil {
 		logger.Errorf("cannot read %s: %s", preset.GetSpecFilename(), err)
@@ -43,6 +51,11 @@ func LoadSpec(preset Preset) (*Spec, error) {
 }
 
 func NewSpec(preset Preset) *Spec {
+	if preset == nil {
+		logger.Warnf("no preset has been provided, using default preset")
+		preset = &DefaultPreset{}
+	}
+
 	spec := &Spec{
 		Version:    VERSION,
 		VendorDir:  "vendor/",
@@ -61,6 +74,7 @@ func (s *Spec) Add(dependency *Dependency) {
 	} else {
 		s.Deps = append(s.Deps, dependency)
 	}
+	s.applyPreset(s.Preset)
 }
 
 func (s *Spec) Save() error {
@@ -73,13 +87,11 @@ func (s *Spec) Save() error {
 }
 
 func (s *Spec) applyPreset(preset Preset) {
-	if preset == nil {
-		return
-	}
 	s.Preset = preset
-	s.Extensions = s.Preset.GetExtensions()
+	s.Extensions = utils.Union(s.Extensions, s.Preset.GetExtensions())
 	for _, dep := range s.Deps {
-		dep.Targets = s.Preset.GetTargets(dep)
+		dep.Targets = utils.Union(dep.Targets, s.Preset.GetTargets(dep))
+		dep.Ignores = utils.Union(dep.Ignores, s.Preset.GetIgnores(dep))
 	}
 }
 
