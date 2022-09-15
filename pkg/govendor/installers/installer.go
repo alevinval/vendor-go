@@ -23,12 +23,10 @@ func NewInstaller(cache string, spec *govendor.Spec, lock *govendor.SpecLock) *I
 }
 
 func (in *Installer) Install() error {
-	in.spec.LoadPreset()
 	return in.run(installFunc)
 }
 
 func (in *Installer) Update() error {
-	in.spec.LoadPreset()
 	return in.run(updateFunc)
 }
 

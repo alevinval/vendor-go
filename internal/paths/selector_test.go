@@ -8,7 +8,7 @@ import (
 )
 
 func TestPathSelector(t *testing.T) {
-	spec := govendor.NewSpec()
+	spec := govendor.NewSpec(nil)
 	spec.Targets = []string{"spec-target"}
 	spec.Ignores = []string{"spec-ignores"}
 	spec.Extensions = []string{"spec-extensions"}

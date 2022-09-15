@@ -7,7 +7,7 @@ import (
 )
 
 func TestSpecAdd(t *testing.T) {
-	sut := NewSpec()
+	sut := NewSpec(nil)
 	assert.Empty(t, sut.Deps)
 
 	dep := NewDependency("some-url", "some-branch")
@@ -18,7 +18,7 @@ func TestSpecAdd(t *testing.T) {
 
 func TestSpecAddUpdates(t *testing.T) {
 	dep := NewDependency("some-url", "some-branch")
-	sut := NewSpec()
+	sut := NewSpec(nil)
 	sut.Deps = append(sut.Deps, dep)
 
 	assert.Equal(t, []string{}, sut.Deps[0].Targets)
@@ -29,9 +29,4 @@ func TestSpecAddUpdates(t *testing.T) {
 
 	assert.Equal(t, []*Dependency{dep}, sut.Deps)
 	assert.Equal(t, []string{"other-target"}, sut.Deps[0].Targets)
-}
-
-func TestSpecToYaml(t *testing.T) {
-	sut := NewSpec()
-	assert.Equal(t, "version: 0.0.1\nvendor_dir: vendor/\ndeps: []\n", string(sut.ToYaml()))
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func TestSpecLockAdd(t *testing.T) {
-	sut := NewSpecLock()
+	sut := NewSpecLock(nil)
 	assert.Empty(t, sut.Deps)
 
 	lock := NewDependencyLock("some-url", "some-commit")
@@ -18,7 +18,7 @@ func TestSpecLockAdd(t *testing.T) {
 
 func TestSpecLockAddUpdates(t *testing.T) {
 	lock := NewDependencyLock("some-url", "some-commit")
-	sut := NewSpecLock()
+	sut := NewSpecLock(nil)
 	sut.Deps = append(sut.Deps, lock)
 
 	assert.Equal(t, "some-commit", sut.Deps[0].Commit)
@@ -27,9 +27,4 @@ func TestSpecLockAddUpdates(t *testing.T) {
 	sut.Add(other)
 
 	assert.Equal(t, "other-commit", sut.Deps[0].Commit)
-}
-
-func TestSpecLockToYaml(t *testing.T) {
-	sut := NewSpecLock()
-	assert.Equal(t, "version: 0.0.1\ndeps: []\n", string(sut.ToYaml()))
 }

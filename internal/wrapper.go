@@ -25,3 +25,15 @@ func (w *PresetWrapper) GetSpecLockFilename() string {
 		return w.Preset.GetSpecLockFilename()
 	}
 }
+
+func (w *PresetWrapper) LoadSpec() (*govendor.Spec, error) {
+	return govendor.LoadSpec(w)
+}
+
+func (w *PresetWrapper) LoadSpecLock() (*govendor.SpecLock, error) {
+	return govendor.LoadSpecLock(w)
+}
+
+func (w *PresetWrapper) NewSpec() *govendor.Spec {
+	return govendor.NewSpec(w)
+}

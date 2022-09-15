@@ -1,18 +1,42 @@
 package govendor
 
 import (
+	"os"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 type SpecLock struct {
-	Version string
+	Version string            `yaml:"version"`
 	Deps    []*DependencyLock `yaml:"deps"`
+	Preset  Preset            `yaml:"-"`
 }
 
-func NewSpecLock() *SpecLock {
+func LoadSpecLock(preset Preset) (*SpecLock, error) {
+	fileName := preset.GetSpecLockFilename()
+	data, err := os.ReadFile(fileName)
+	if err != nil {
+		logger.Errorf("cannot read %s: %s", fileName, err)
+		return nil, err
+	}
+
+	spec := &SpecLock{}
+	err = yaml.Unmarshal(data, spec)
+	if err != nil {
+		logger.Errorf("cannot read %s: %s", fileName, err)
+		return nil, err
+	}
+
+	spec.Preset = preset
+	return spec, nil
+}
+
+func NewSpecLock(preset Preset) *SpecLock {
 	return &SpecLock{
 		Version: VERSION,
 		Deps:    []*DependencyLock{},
+		Preset:  preset,
 	}
 }
 
@@ -34,6 +58,11 @@ func (s *SpecLock) Find(url string) (*DependencyLock, bool) {
 	return nil, false
 }
 
-func (s *SpecLock) ToYaml() []byte {
-	return toYaml(s)
+func (s *SpecLock) Save() error {
+	data, err := toYaml(s)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(s.Preset.GetSpecLockFilename(), data, os.ModePerm)
 }

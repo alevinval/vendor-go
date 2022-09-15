@@ -1,12 +1,18 @@
 package govendor
 
 import (
+	"os"
 	"strings"
+
+	"github.com/alevinval/vendor-go/pkg/govendor/log"
+	"gopkg.in/yaml.v3"
 )
 
-const VERSION = "0.0.1"
+const VERSION = "0.1.0"
 const SPEC_FILENAME = ".vendor.yml"
 const SPEC_LOCK_FILENAME = ".vendor-lock.yml"
+
+var logger = log.GetLogger()
 
 type Spec struct {
 	Version    string
@@ -18,8 +24,26 @@ type Spec struct {
 	Preset     Preset        `yaml:"-"`
 }
 
-func NewSpec() *Spec {
-	return &Spec{
+func LoadSpec(preset Preset) (*Spec, error) {
+	data, err := os.ReadFile(preset.GetSpecFilename())
+	if err != nil {
+		logger.Errorf("cannot read %s: %s", preset.GetSpecFilename(), err)
+		return nil, err
+	}
+
+	spec := &Spec{}
+	err = yaml.Unmarshal(data, spec)
+	if err != nil {
+		logger.Errorf("cannot read %s: %s", preset.GetSpecFilename(), err)
+		return nil, err
+	}
+
+	spec.applyPreset(preset)
+	return spec, nil
+}
+
+func NewSpec(preset Preset) *Spec {
+	spec := &Spec{
 		Version:    VERSION,
 		VendorDir:  "vendor/",
 		Extensions: []string{},
@@ -27,6 +51,8 @@ func NewSpec() *Spec {
 		Ignores:    []string{},
 		Deps:       []*Dependency{},
 	}
+	spec.applyPreset(preset)
+	return spec
 }
 
 func (s *Spec) Add(dependency *Dependency) {
@@ -37,14 +63,20 @@ func (s *Spec) Add(dependency *Dependency) {
 	}
 }
 
-func (s *Spec) ToYaml() []byte {
-	return toYaml(s)
+func (s *Spec) Save() error {
+	data, err := toYaml(s)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(s.Preset.GetSpecFilename(), data, os.ModePerm)
 }
 
-func (s *Spec) LoadPreset() {
-	if s.Preset == nil {
+func (s *Spec) applyPreset(preset Preset) {
+	if preset == nil {
 		return
 	}
+	s.Preset = preset
 	s.Extensions = s.Preset.GetExtensions()
 	for _, dep := range s.Deps {
 		dep.Targets = s.Preset.GetTargets(dep)

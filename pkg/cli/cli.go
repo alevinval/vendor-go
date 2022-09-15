@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"path"
 
@@ -12,14 +11,12 @@ import (
 	"github.com/alevinval/vendor-go/pkg/govendor/log"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var (
 	logger = log.GetLogger()
 
 	isDebugEnabled bool
-	preset         govendor.Preset = nil
 )
 
 func newRootCmd(commandName string) *cobra.Command {
@@ -45,10 +42,9 @@ func newInitCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 				return
 			}
 
-			spec := govendor.NewSpec()
-			spec.Preset = wrapper.Preset
+			spec := wrapper.NewSpec()
 
-			err = saveSpec(wrapper, spec)
+			err = spec.Save()
 			if err != nil {
 				logger.Errorf("failed initializing: %s", err)
 				return
@@ -68,7 +64,7 @@ func newAddCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 			url := args[0]
 			branch := args[1]
 
-			spec, err := loadSpec(wrapper)
+			spec, err := wrapper.LoadSpec()
 			if err != nil {
 				return
 			}
@@ -76,7 +72,7 @@ func newAddCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 			dep := govendor.NewDependency(url, branch)
 			spec.Add(dep)
 
-			err = saveSpec(wrapper, spec)
+			spec.Save()
 			if err != nil {
 				logger.Errorf("failed adding dependency: %s", err)
 				return
@@ -92,12 +88,12 @@ func newInstallCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 		Use:   "install",
 		Short: "Installs dependencies respectring the lockfile",
 		Run: func(cmd *cobra.Command, args []string) {
-			spec, err := loadSpec(wrapper)
+			spec, err := wrapper.LoadSpec()
 			if err != nil {
 				return
 			}
 
-			specLock, err := loadSpecLock(wrapper)
+			specLock, err := wrapper.LoadSpecLock()
 			if err != nil {
 				return
 			}
@@ -112,7 +108,13 @@ func newInstallCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 				return
 			}
 
-			err = saveSpecLock(wrapper, specLock)
+			err = spec.Save()
+			if err != nil {
+				logger.Errorf("install failed: %s", err)
+				return
+			}
+
+			err = specLock.Save()
 			if err != nil {
 				logger.Errorf("install failed: %s", err)
 				return
@@ -128,12 +130,12 @@ func newUpdateCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 		Use:   "update",
 		Short: "update dependencies to the latest commit from the branch of the spec",
 		Run: func(cmd *cobra.Command, args []string) {
-			spec, err := loadSpec(wrapper)
+			spec, err := wrapper.LoadSpec()
 			if err != nil {
 				return
 			}
 
-			specLock, err := loadSpecLock(wrapper)
+			specLock, err := wrapper.LoadSpecLock()
 			if err != nil {
 				return
 			}
@@ -148,7 +150,13 @@ func newUpdateCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 				return
 			}
 
-			err = saveSpecLock(wrapper, specLock)
+			err = spec.Save()
+			if err != nil {
+				logger.Errorf("update failed: %s", err)
+				return
+			}
+
+			err = specLock.Save()
 			if err != nil {
 				logger.Errorf("update failed: %s", err)
 				return
@@ -157,56 +165,6 @@ func newUpdateCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 			logger.Infof("update success ✅")
 		},
 	}
-}
-
-func loadSpec(pw *internal.PresetWrapper) (*govendor.Spec, error) {
-	data, err := os.ReadFile(pw.GetSpecFilename())
-	if err != nil {
-		logger.Warnf("cannot read %s: %s", pw.GetSpecFilename(), err)
-		return nil, err
-	}
-
-	spec := govendor.NewSpec()
-	err = yaml.Unmarshal(data, spec)
-	if err != nil {
-		logger.Errorf("cannot read %s: %s", govendor.SPEC_FILENAME, err)
-		return nil, err
-	}
-
-	spec.Preset = pw.Preset
-	return spec, nil
-}
-
-func loadSpecLock(pw *internal.PresetWrapper) (*govendor.SpecLock, error) {
-	data, err := os.ReadFile(pw.GetSpecLockFilename())
-	if err != nil {
-		return govendor.NewSpecLock(), nil
-	}
-
-	spec := govendor.NewSpecLock()
-	err = yaml.Unmarshal(data, spec)
-	if err != nil {
-		logger.Errorf("cannot read %s: %s", pw.GetSpecLockFilename(), err)
-		return nil, err
-	}
-
-	return spec, nil
-}
-
-type YamlSerializable interface {
-	ToYaml() []byte
-}
-
-func saveSpec(wrapper *internal.PresetWrapper, spec *govendor.Spec) error {
-	return saveFile(wrapper.GetSpecFilename(), spec)
-}
-
-func saveSpecLock(wrapper *internal.PresetWrapper, specLock *govendor.SpecLock) error {
-	return saveFile(wrapper.GetSpecLockFilename(), specLock)
-}
-
-func saveFile(filename string, s YamlSerializable) error {
-	return os.WriteFile(filename, s.ToYaml(), fs.ModePerm)
 }
 
 func NewVendorCmd(commandName string, preset govendor.Preset) *cobra.Command {
