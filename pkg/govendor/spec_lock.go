@@ -10,10 +10,12 @@ import (
 type SpecLock struct {
 	Version string            `yaml:"version"`
 	Deps    []*DependencyLock `yaml:"deps"`
-	Preset  Preset            `yaml:"-"`
+	preset  Preset            `yaml:"-"`
 }
 
 func LoadSpecLock(preset Preset) (*SpecLock, error) {
+	preset = checkPreset(preset, false)
+
 	fileName := preset.GetSpecLockFilename()
 	data, err := os.ReadFile(fileName)
 	if err != nil {
@@ -28,7 +30,7 @@ func LoadSpecLock(preset Preset) (*SpecLock, error) {
 		return nil, err
 	}
 
-	spec.Preset = preset
+	spec.preset = preset
 	return spec, nil
 }
 
@@ -36,7 +38,7 @@ func NewSpecLock(preset Preset) *SpecLock {
 	return &SpecLock{
 		Version: VERSION,
 		Deps:    []*DependencyLock{},
-		Preset:  preset,
+		preset:  preset,
 	}
 }
 
@@ -64,5 +66,5 @@ func (s *SpecLock) Save() error {
 		return err
 	}
 
-	return os.WriteFile(s.Preset.GetSpecLockFilename(), data, os.ModePerm)
+	return os.WriteFile(s.preset.GetSpecLockFilename(), data, os.ModePerm)
 }
