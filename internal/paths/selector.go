@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alevinval/vendor-go/pkg/core"
+	"github.com/alevinval/vendor-go/pkg/govendor"
 )
 
 type PathSelector struct {
@@ -13,7 +13,7 @@ type PathSelector struct {
 	Extensions []string
 }
 
-func NewPathSelector(spec *core.Spec, dep *core.Dependency) *PathSelector {
+func NewPathSelector(spec *govendor.Spec, dep *govendor.Dependency) *PathSelector {
 	return &PathSelector{
 		Targets:    append(spec.Targets, dep.Targets...),
 		Ignores:    append(spec.Ignores, dep.Ignores...),

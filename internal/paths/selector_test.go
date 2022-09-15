@@ -3,18 +3,17 @@ package paths
 import (
 	"testing"
 
-	"github.com/alevinval/vendor-go/pkg/core"
-
+	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPathSelector(t *testing.T) {
-	spec := core.NewSpec()
+	spec := govendor.NewSpec()
 	spec.Targets = []string{"spec-target"}
 	spec.Ignores = []string{"spec-ignores"}
 	spec.Extensions = []string{"spec-extensions"}
 
-	dep := core.NewDependency("some-url", "some-branch")
+	dep := govendor.NewDependency("some-url", "some-branch")
 	dep.Targets = []string{"dep-target"}
 	dep.Ignores = []string{"dep-ignores"}
 	dep.Extensions = []string{"dep-extensions"}

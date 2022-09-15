@@ -7,9 +7,9 @@ import (
 	"path"
 
 	"github.com/alevinval/vendor-go/internal"
-	"github.com/alevinval/vendor-go/pkg/core"
-	"github.com/alevinval/vendor-go/pkg/core/installers"
-	"github.com/alevinval/vendor-go/pkg/core/log"
+	"github.com/alevinval/vendor-go/pkg/govendor"
+	"github.com/alevinval/vendor-go/pkg/govendor/installers"
+	"github.com/alevinval/vendor-go/pkg/govendor/log"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -19,13 +19,13 @@ var (
 	logger = log.GetLogger()
 
 	isDebugEnabled bool
-	preset         core.Preset = nil
+	preset         govendor.Preset = nil
 )
 
 func newRootCmd(commandName string) *cobra.Command {
 	return &cobra.Command{
 		Use:   commandName,
-		Short: fmt.Sprintf("[%s] %s is a flexible and customizable vendoring tool", core.VERSION, commandName),
+		Short: fmt.Sprintf("[%s] %s is a flexible and customizable vendoring tool", govendor.VERSION, commandName),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if isDebugEnabled {
 				log.EnableDebug()
@@ -41,11 +41,11 @@ func newInitCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			_, err := os.ReadFile(wrapper.GetSpecFilename())
 			if err == nil {
-				logger.Warnf("%s already exists", core.SPEC_FILENAME)
+				logger.Warnf("%s already exists", govendor.SPEC_FILENAME)
 				return
 			}
 
-			spec := core.NewSpec()
+			spec := govendor.NewSpec()
 			spec.Preset = wrapper.Preset
 
 			err = saveSpec(wrapper, spec)
@@ -54,7 +54,7 @@ func newInitCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 				return
 			}
 
-			logger.Infof("%s has been created", core.SPEC_FILENAME)
+			logger.Infof("%s has been created", govendor.SPEC_FILENAME)
 		},
 	}
 }
@@ -73,7 +73,7 @@ func newAddCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 				return
 			}
 
-			dep := core.NewDependency(url, branch)
+			dep := govendor.NewDependency(url, branch)
 			spec.Add(dep)
 
 			err = saveSpec(wrapper, spec)
@@ -159,17 +159,17 @@ func newUpdateCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 	}
 }
 
-func loadSpec(pw *internal.PresetWrapper) (*core.Spec, error) {
+func loadSpec(pw *internal.PresetWrapper) (*govendor.Spec, error) {
 	data, err := os.ReadFile(pw.GetSpecFilename())
 	if err != nil {
 		logger.Warnf("cannot read %s: %s", pw.GetSpecFilename(), err)
 		return nil, err
 	}
 
-	spec := core.NewSpec()
+	spec := govendor.NewSpec()
 	err = yaml.Unmarshal(data, spec)
 	if err != nil {
-		logger.Errorf("cannot read %s: %s", core.SPEC_FILENAME, err)
+		logger.Errorf("cannot read %s: %s", govendor.SPEC_FILENAME, err)
 		return nil, err
 	}
 
@@ -177,13 +177,13 @@ func loadSpec(pw *internal.PresetWrapper) (*core.Spec, error) {
 	return spec, nil
 }
 
-func loadSpecLock(pw *internal.PresetWrapper) (*core.SpecLock, error) {
+func loadSpecLock(pw *internal.PresetWrapper) (*govendor.SpecLock, error) {
 	data, err := os.ReadFile(pw.GetSpecLockFilename())
 	if err != nil {
-		return core.NewSpecLock(), nil
+		return govendor.NewSpecLock(), nil
 	}
 
-	spec := core.NewSpecLock()
+	spec := govendor.NewSpecLock()
 	err = yaml.Unmarshal(data, spec)
 	if err != nil {
 		logger.Errorf("cannot read %s: %s", pw.GetSpecLockFilename(), err)
@@ -197,11 +197,11 @@ type YamlSerializable interface {
 	ToYaml() []byte
 }
 
-func saveSpec(wrapper *internal.PresetWrapper, spec *core.Spec) error {
+func saveSpec(wrapper *internal.PresetWrapper, spec *govendor.Spec) error {
 	return saveFile(wrapper.GetSpecFilename(), spec)
 }
 
-func saveSpecLock(wrapper *internal.PresetWrapper, specLock *core.SpecLock) error {
+func saveSpecLock(wrapper *internal.PresetWrapper, specLock *govendor.SpecLock) error {
 	return saveFile(wrapper.GetSpecLockFilename(), specLock)
 }
 
@@ -209,7 +209,7 @@ func saveFile(filename string, s YamlSerializable) error {
 	return os.WriteFile(filename, s.ToYaml(), fs.ModePerm)
 }
 
-func NewVendorCmd(commandName string, preset core.Preset) *cobra.Command {
+func NewVendorCmd(commandName string, preset govendor.Preset) *cobra.Command {
 	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
 

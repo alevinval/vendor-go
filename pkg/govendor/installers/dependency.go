@@ -6,21 +6,21 @@ import (
 
 	"github.com/alevinval/vendor-go/internal"
 	"github.com/alevinval/vendor-go/internal/paths"
-	"github.com/alevinval/vendor-go/pkg/core"
-	"github.com/alevinval/vendor-go/pkg/core/log"
+	"github.com/alevinval/vendor-go/pkg/govendor"
+	"github.com/alevinval/vendor-go/pkg/govendor/log"
 	"github.com/fatih/color"
 )
 
 var logger = log.GetLogger()
 
 type dependencyInstaller struct {
-	dep           *core.Dependency
-	depLock       *core.DependencyLock
+	dep           *govendor.Dependency
+	depLock       *govendor.DependencyLock
 	repo          *internal.Repository
 	importFilesFn fs.WalkDirFunc
 }
 
-func newDependencyInstaller(spec *core.Spec, dep *core.Dependency, depLock *core.DependencyLock, repo *internal.Repository) *dependencyInstaller {
+func newDependencyInstaller(spec *govendor.Spec, dep *govendor.Dependency, depLock *govendor.DependencyLock, repo *internal.Repository) *dependencyInstaller {
 	selector := paths.NewPathSelector(spec, dep)
 	importFilesFn := paths.ImportFileFunc(selector, repo.Path(), spec.VendorDir)
 
@@ -32,7 +32,7 @@ func newDependencyInstaller(spec *core.Spec, dep *core.Dependency, depLock *core
 	}
 }
 
-func (d *dependencyInstaller) Install() (*core.DependencyLock, error) {
+func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
 	err := d.repo.Ensure()
 	if err != nil {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
@@ -50,7 +50,7 @@ func (d *dependencyInstaller) Install() (*core.DependencyLock, error) {
 	return d.importFiles()
 }
 
-func (d *dependencyInstaller) Update() (*core.DependencyLock, error) {
+func (d *dependencyInstaller) Update() (*govendor.DependencyLock, error) {
 	err := d.repo.Ensure()
 	if err != nil {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
@@ -65,7 +65,7 @@ func (d *dependencyInstaller) Update() (*core.DependencyLock, error) {
 	return d.importFiles()
 }
 
-func (d *dependencyInstaller) importFiles() (*core.DependencyLock, error) {
+func (d *dependencyInstaller) importFiles() (*govendor.DependencyLock, error) {
 	err := d.repo.WalkDir(d.importFilesFn)
 	if err != nil {
 		return nil, fmt.Errorf("cannot import files: %s", err)
@@ -76,5 +76,5 @@ func (d *dependencyInstaller) importFiles() (*core.DependencyLock, error) {
 		return nil, fmt.Errorf("cannot get current commit: %s", err)
 	}
 
-	return core.NewDependencyLock(d.dep.URL, commit), nil
+	return govendor.NewDependencyLock(d.dep.URL, commit), nil
 }

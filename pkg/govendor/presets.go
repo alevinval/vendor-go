@@ -1,4 +1,4 @@
-package core
+package govendor
 
 type Preset interface {
 	GetSpecFilename() string

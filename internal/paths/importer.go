@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alevinval/vendor-go/pkg/core/log"
+	"github.com/alevinval/vendor-go/pkg/govendor/log"
 )
 
 var logger = log.GetLogger()

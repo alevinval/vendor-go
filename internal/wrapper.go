@@ -1,18 +1,18 @@
 package internal
 
-import "github.com/alevinval/vendor-go/pkg/core"
+import "github.com/alevinval/vendor-go/pkg/govendor"
 
 type PresetWrapper struct {
-	core.Preset
+	govendor.Preset
 }
 
-func WrapPreset(preset core.Preset) *PresetWrapper {
+func WrapPreset(preset govendor.Preset) *PresetWrapper {
 	return &PresetWrapper{preset}
 }
 
 func (w *PresetWrapper) GetSpecFilename() string {
 	if w.Preset == nil {
-		return core.SPEC_FILENAME
+		return govendor.SPEC_FILENAME
 	} else {
 		return w.Preset.GetSpecFilename()
 	}
@@ -20,7 +20,7 @@ func (w *PresetWrapper) GetSpecFilename() string {
 
 func (w *PresetWrapper) GetSpecLockFilename() string {
 	if w.Preset == nil {
-		return core.SPEC_FILENAME
+		return govendor.SPEC_FILENAME
 	} else {
 		return w.Preset.GetSpecLockFilename()
 	}

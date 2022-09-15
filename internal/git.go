@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/alevinval/vendor-go/pkg/core/log"
+	"github.com/alevinval/vendor-go/pkg/govendor/log"
 
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
