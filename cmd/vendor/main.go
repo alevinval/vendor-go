@@ -1,7 +1,10 @@
 package main
 
-import "github.com/alevinval/vendor-go/pkg/cli"
+import (
+	"github.com/alevinval/vendor-go/pkg/cli"
+	"github.com/alevinval/vendor-go/pkg/govendor"
+)
 
 func main() {
-	cli.Run()
+	cli.NewVendorCmd("vendor", &govendor.DefaultPreset{}).Execute()
 }
