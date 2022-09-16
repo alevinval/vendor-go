@@ -85,9 +85,12 @@ func (s *Spec) applyPreset(preset Preset) {
 	s.preset = preset
 	s.Preset = preset.GetPresetName()
 	s.Extensions = utils.Union(s.Extensions, s.preset.GetExtensions())
+	s.Targets = utils.Union(s.Targets, s.preset.GetTargets())
+	s.Ignores = utils.Union(s.Ignores, s.preset.GetIgnores())
 	for _, dep := range s.Deps {
-		dep.Targets = utils.Union(dep.Targets, s.preset.GetTargets(dep))
-		dep.Ignores = utils.Union(dep.Ignores, s.preset.GetIgnores(dep))
+		dep.Extensions = utils.Union(dep.Extensions, s.preset.GetDepExtensions(dep))
+		dep.Targets = utils.Union(dep.Targets, s.preset.GetDepTargets(dep))
+		dep.Ignores = utils.Union(dep.Ignores, s.preset.GetDepIgnores(dep))
 	}
 }
 

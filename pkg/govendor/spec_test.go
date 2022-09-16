@@ -9,20 +9,43 @@ import (
 
 var _ Preset = (*TestPreset)(nil)
 
-type TestPreset struct {
-	*DefaultPreset
+type TestPreset struct{}
+
+func (tp *TestPreset) GetPresetName() string {
+	return "test-preset"
+}
+
+func (tp *TestPreset) GetSpecFilename() string {
+	return "some-spec-filename"
+}
+
+func (tp *TestPreset) GetSpecLockFilename() string {
+	return "some-spec-lock-filename"
 }
 
 func (tp *TestPreset) GetExtensions() []string {
-	return []string{"md", "java"}
+	return []string{"preset-extension"}
 }
 
-func (tp *TestPreset) GetTargets(dep *Dependency) []string {
+func (tp *TestPreset) GetTargets() []string {
+	return []string{"preset-target"}
+}
+
+func (tp *TestPreset) GetIgnores() []string {
+	return []string{"preset-ignore"}
+}
+
+func (tp *TestPreset) GetDepExtensions(dep *Dependency) []string {
+	target := fmt.Sprintf("preset-extension-for-%s", dep.URL)
+	return []string{target}
+}
+
+func (tp *TestPreset) GetDepTargets(dep *Dependency) []string {
 	target := fmt.Sprintf("preset-target-for-%s", dep.URL)
 	return []string{target}
 }
 
-func (tp *TestPreset) GetIgnores(dep *Dependency) []string {
+func (tp *TestPreset) GetDepIgnores(dep *Dependency) []string {
 	ignore := fmt.Sprintf("preset-ignore-for-%s", dep.URL)
 	return []string{ignore}
 }
@@ -31,9 +54,9 @@ func TestNewSpec_LoadsPreset(t *testing.T) {
 	spec := NewSpec(&TestPreset{})
 
 	assert.Equal(t, &TestPreset{}, spec.preset)
-	assert.Equal(t, []string{"java", "md"}, spec.Extensions)
-	assert.Equal(t, []string{}, spec.Targets)
-	assert.Equal(t, []string{}, spec.Ignores)
+	assert.Equal(t, []string{"preset-extension"}, spec.Extensions)
+	assert.Equal(t, []string{"preset-target"}, spec.Targets)
+	assert.Equal(t, []string{"preset-ignore"}, spec.Ignores)
 }
 
 func TestSpecAdd_AddsDeps(t *testing.T) {

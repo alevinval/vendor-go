@@ -9,9 +9,14 @@ type Preset interface {
 	GetPresetName() string
 	GetSpecFilename() string
 	GetSpecLockFilename() string
+
 	GetExtensions() []string
-	GetTargets(dep *Dependency) []string
-	GetIgnores(dep *Dependency) []string
+	GetTargets() []string
+	GetIgnores() []string
+
+	GetDepExtensions(dep *Dependency) []string
+	GetDepTargets(dep *Dependency) []string
+	GetDepIgnores(dep *Dependency) []string
 }
 
 // DefaultPreset provides the default configuration for the vendor library.
@@ -33,10 +38,22 @@ func (dp *DefaultPreset) GetExtensions() []string {
 	return []string{}
 }
 
-func (dp *DefaultPreset) GetTargets(dep *Dependency) []string {
+func (dp *DefaultPreset) GetTargets() []string {
 	return []string{}
 }
 
-func (dp *DefaultPreset) GetIgnores(dep *Dependency) []string {
+func (dp *DefaultPreset) GetIgnores() []string {
+	return []string{}
+}
+
+func (dp *DefaultPreset) GetDepExtensions(*Dependency) []string {
+	return []string{}
+}
+
+func (dp *DefaultPreset) GetDepTargets(*Dependency) []string {
+	return []string{}
+}
+
+func (dp *DefaultPreset) GetDepIgnores(*Dependency) []string {
 	return []string{}
 }
