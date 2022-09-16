@@ -4,8 +4,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/alevinval/vendor-go/internal/log"
 	"github.com/alevinval/vendor-go/internal/utils"
-	"github.com/alevinval/vendor-go/pkg/govendor/log"
 	"gopkg.in/yaml.v3"
 )
 

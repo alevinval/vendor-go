@@ -6,9 +6,9 @@ import (
 	"path"
 
 	"github.com/alevinval/vendor-go/internal"
+	"github.com/alevinval/vendor-go/internal/installers"
+	"github.com/alevinval/vendor-go/internal/log"
 	"github.com/alevinval/vendor-go/pkg/govendor"
-	"github.com/alevinval/vendor-go/pkg/govendor/installers"
-	"github.com/alevinval/vendor-go/pkg/govendor/log"
 
 	"github.com/spf13/cobra"
 )

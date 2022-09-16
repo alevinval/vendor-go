@@ -5,9 +5,9 @@ import (
 	"io/fs"
 
 	"github.com/alevinval/vendor-go/internal"
+	"github.com/alevinval/vendor-go/internal/log"
 	"github.com/alevinval/vendor-go/internal/paths"
 	"github.com/alevinval/vendor-go/pkg/govendor"
-	"github.com/alevinval/vendor-go/pkg/govendor/log"
 	"github.com/fatih/color"
 )
 
