@@ -20,7 +20,7 @@ func TestSpecYamlSerialization(t *testing.T) {
 
 	expected := `version: 0.2.0
 preset: test-preset
-vendor_dir: vendor/
+vendor_dir: test-vendor-dir
 extensions:
   - preset-extension
 targets:
