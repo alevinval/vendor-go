@@ -9,20 +9,21 @@ import (
 func TestDependencyUpdate(t *testing.T) {
 	dep := NewDependency("some-url", "some-branch")
 
-	assert.Empty(t, dep.Targets)
-	assert.Empty(t, dep.Ignores)
-	assert.Empty(t, dep.Extensions)
+	assert.Empty(t, dep.Filters.Targets)
+	assert.Empty(t, dep.Filters.Ignores)
+	assert.Empty(t, dep.Filters.Extensions)
 
 	other := NewDependency("some-url", "some-branch")
-	other.Targets = []string{"some-targets"}
-	other.Ignores = []string{"some-ignores"}
-	other.Extensions = []string{"some-extensions"}
+	other.Filters = NewFilters().
+		AddExtension("some-extension").
+		AddTarget("some-target").
+		AddIgnore("some-ignore")
 
 	dep.Update(other)
 
-	assert.Equal(t, other.Targets, dep.Targets)
-	assert.Equal(t, other.Ignores, dep.Ignores)
-	assert.Equal(t, other.Extensions, dep.Extensions)
+	assert.Equal(t, other.Filters.Extensions, dep.Filters.Extensions)
+	assert.Equal(t, other.Filters.Targets, dep.Filters.Targets)
+	assert.Equal(t, other.Filters.Ignores, dep.Filters.Ignores)
 }
 
 func TestDependencyID(t *testing.T) {
