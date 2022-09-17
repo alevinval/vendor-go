@@ -49,11 +49,11 @@ func (dp *DefaultPreset) GetVendorDir() string {
 }
 
 func (dp *DefaultPreset) GetSpecFilename() string {
-	return SPEC_FILENAME
+	return ".vendor.yml"
 }
 
 func (dp *DefaultPreset) GetSpecLockFilename() string {
-	return SPEC_LOCK_FILENAME
+	return ".vendor-lock.yml"
 }
 
 func (dp *DefaultPreset) GetFilters() *Filters {

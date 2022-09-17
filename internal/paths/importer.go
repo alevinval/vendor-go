@@ -16,8 +16,7 @@ var logger = log.GetLogger()
 func ImportFileFunc(selector *PathSelector, srcRoot, dstRoot string) fs.WalkDirFunc {
 	return func(path string, _ os.DirEntry, err error) error {
 		if err != nil {
-			logger.Errorf("import interrupted: %s", err)
-			return err
+			return fmt.Errorf("import interrupted: %w", err)
 		}
 
 		relativePath := strings.TrimPrefix(path, srcRoot)
@@ -31,7 +30,7 @@ func ImportFileFunc(selector *PathSelector, srcRoot, dstRoot string) fs.WalkDirF
 		dstDir := filepath.Dir(dst)
 		err = os.MkdirAll(dstDir, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("cannot create target path %s: %s", dstDir, err)
+			return fmt.Errorf("cannot create target path %q: %w", dstDir, err)
 		}
 		return copyFile(path, dst)
 	}
@@ -40,19 +39,25 @@ func ImportFileFunc(selector *PathSelector, srcRoot, dstRoot string) fs.WalkDirF
 func copyFile(src, dst string) error {
 	in, err := os.Open(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot open %q: %w", src, err)
 	}
 	defer in.Close()
 
 	out, err := os.Create(dst)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot create %q: %w", dst, err)
 	}
 	defer out.Close()
 
 	_, err = io.Copy(out, in)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot copy %q => %q: %w", src, dst, err)
 	}
-	return out.Close()
+
+	err = out.Close()
+	if err != nil {
+		return fmt.Errorf("cannot close %q: %w", dst, err)
+	}
+
+	return nil
 }

@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/alevinval/vendor-go/internal/log"
 
 	git "github.com/go-git/go-git/v5"
@@ -14,12 +16,12 @@ type Git struct{}
 func (g Git) GetCurrentCommit(path string) (string, error) {
 	repo, err := git.PlainOpen(path)
 	if err != nil {
-		return "", err
+		return "", gitOpenErr(err)
 	}
 
 	head, err := repo.Head()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("cannot get HEAD reference: %w", err)
 	}
 
 	return head.Hash().String(), nil
@@ -31,7 +33,12 @@ func (g Git) OpenOrClone(url, branch, path string) error {
 		return nil
 	}
 
-	return g.Clone(url, branch, path)
+	err = g.Clone(url, branch, path)
+	if err != nil {
+		return fmt.Errorf("cannot clone: %w", err)
+	}
+
+	return nil
 }
 
 func (g Git) Clone(url, branch, path string) error {
@@ -41,13 +48,17 @@ func (g Git) Clone(url, branch, path string) error {
 		ReferenceName: plumbing.NewBranchReferenceName(branch),
 	}
 	_, err := git.PlainClone(path, false, cloneOpts)
-	return err
+	if err != nil {
+		return gitCloneErr(err)
+	}
+
+	return nil
 }
 
 func (g Git) Fetch(path string) error {
 	repo, err := git.PlainOpen(path)
 	if err != nil {
-		return err
+		return gitOpenErr(err)
 	}
 
 	fetchOpts := &git.FetchOptions{
@@ -55,26 +66,30 @@ func (g Git) Fetch(path string) error {
 		Tags:  git.AllTags,
 	}
 	err = repo.Fetch(fetchOpts)
-	if err == git.NoErrAlreadyUpToDate {
+	switch err {
+	case git.NoErrAlreadyUpToDate:
+		return nil
+	case nil:
 		return nil
 	}
-	return err
+
+	return fmt.Errorf("cannot fetch: %w", err)
 }
 
 func (g Git) Reset(path, refname string) error {
 	repo, err := git.PlainOpen(path)
 	if err != nil {
-		return err
+		return gitOpenErr(err)
 	}
 
 	hash, err := repo.ResolveRevision(plumbing.Revision(refname))
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot resolve %q: %w", refname, err)
 	}
 
 	wt, err := repo.Worktree()
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot get worktree: %w", err)
 	}
 
 	cleanOpts := &git.CleanOptions{
@@ -82,12 +97,25 @@ func (g Git) Reset(path, refname string) error {
 	}
 	err = wt.Clean(cleanOpts)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot clean: %w", err)
 	}
 
 	opts := &git.ResetOptions{
 		Commit: *hash,
 		Mode:   git.HardReset,
 	}
-	return wt.Reset(opts)
+	err = wt.Reset(opts)
+	if err != nil {
+		return fmt.Errorf("cannot reset: %w", err)
+	}
+
+	return nil
+}
+
+func gitOpenErr(err error) error {
+	return fmt.Errorf("cannot open repository: %w", err)
+}
+
+func gitCloneErr(err error) error {
+	return fmt.Errorf("cannot clone: %w", err)
 }
