@@ -58,7 +58,7 @@ func (tp *TestPreset) GetFiltersForDependency(dep *Dependency) *Filters {
 func TestNewSpec_LoadsPreset(t *testing.T) {
 	spec := NewSpec(&TestPreset{})
 	dep := NewDependency("some-url", "some-branch")
-	spec.Add(dep)
+	spec.AddDependency(dep)
 
 	expectedSpecFilters := NewFilters().
 		AddExtension("preset-extension").
@@ -81,7 +81,7 @@ func TestSpecAdd_AddsDeps(t *testing.T) {
 	assert.Empty(t, sut.Deps)
 
 	dep := NewDependency("some-url", "some-branch")
-	sut.Add(dep)
+	sut.AddDependency(dep)
 
 	assert.Equal(t, []*Dependency{dep}, sut.Deps)
 }
@@ -101,7 +101,7 @@ func TestSpecAdd_WhenDepAlreadyPresent_UpdatesExistingDep(t *testing.T) {
 		AddExtension("other-extension").
 		AddTarget("other-target").
 		AddIgnore("other-ignore")
-	sut.Add(other)
+	sut.AddDependency(other)
 
 	assert.Equal(t, []*Dependency{dep}, sut.Deps)
 	assert.Equal(t, other.Filters, sut.Deps[0].Filters)
@@ -121,7 +121,7 @@ func TestSpec_WhenForceFilters_OverridesFilters(t *testing.T) {
 		AddExtension("to-be-replaced").
 		AddTarget("to-be-replaced").
 		AddIgnore("to-be-replaced")
-	sut.Add(dep)
+	sut.AddDependency(dep)
 
 	sut.applyPreset(preset)
 
