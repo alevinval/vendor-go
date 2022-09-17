@@ -5,13 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/alevinval/vendor-go/internal/log"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
 
 const VERSION = "0.2.0"
-
-var logger = log.GetLogger()
 
 type Spec struct {
 	Version    string        `yaml:"version"`
@@ -112,7 +110,7 @@ func (s *Spec) findDep(dependency *Dependency) (*Dependency, bool) {
 func checkPreset(preset Preset, warn bool) Preset {
 	if preset == nil {
 		if warn {
-			logger.Warnf("no preset has been provided, using default preset")
+			zap.S().Warnf("no preset has been provided, using default preset")
 		}
 		return &DefaultPreset{}
 	}
@@ -123,7 +121,7 @@ func checkPreset(preset Preset, warn bool) Preset {
 			break
 		default:
 			if p.GetPresetName() == "default" {
-				logger.Warnf("custom preset injected, but the name is \"default\" which is used for the default preset name, this will be confusing for users, consider a different name for your preset")
+				zap.S().Warnf("custom preset injected, but the name is \"default\" which is used for the default preset name, this will be confusing for users, consider a different name for your preset")
 			}
 		}
 	}

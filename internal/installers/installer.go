@@ -7,6 +7,7 @@ import (
 	"github.com/alevinval/vendor-go/internal"
 	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/fatih/color"
+	"go.uber.org/zap"
 )
 
 type Installer struct {
@@ -44,7 +45,7 @@ func (in *Installer) run(action actionFunc) error {
 			return fmt.Errorf("cannot complete action: %w", err)
 		}
 
-		logger.Infof("  🔒 %s", color.YellowString(newLock.Commit))
+		zap.S().Infof("  🔒 %s", color.YellowString(newLock.Commit))
 		in.lock.Add(newLock)
 	}
 

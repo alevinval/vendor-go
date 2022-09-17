@@ -8,10 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alevinval/vendor-go/internal/log"
+	"go.uber.org/zap"
 )
-
-var logger = log.GetLogger()
 
 func ImportFileFunc(selector *PathSelector, srcRoot, dstRoot string) fs.WalkDirFunc {
 	return func(path string, _ os.DirEntry, err error) error {
@@ -25,7 +23,7 @@ func ImportFileFunc(selector *PathSelector, srcRoot, dstRoot string) fs.WalkDirF
 		}
 
 		dst := filepath.Join(dstRoot, relativePath)
-		logger.Debugf("  ..%s -> %s", relativePath, dst)
+		zap.S().Debugf("  ..%s -> %s", relativePath, dst)
 
 		dstDir := filepath.Dir(dst)
 		err = os.MkdirAll(dstDir, os.ModePerm)
