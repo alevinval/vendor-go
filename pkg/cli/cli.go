@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"os"
-	"path"
 
 	"github.com/alevinval/vendor-go/internal"
 	"github.com/alevinval/vendor-go/internal/installers"
@@ -98,7 +97,7 @@ func newInstallCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 				return
 			}
 
-			cache := path.Join(os.TempDir(), "vendor-go-cache")
+			cache := wrapper.GetCachePath()
 			logger.Infof("repository cache located at %s", cache)
 
 			m := installers.NewInstaller(cache, spec, specLock)
@@ -140,7 +139,7 @@ func newUpdateCmd(wrapper *internal.PresetWrapper) *cobra.Command {
 				return
 			}
 
-			cache := path.Join(os.TempDir(), "vendor-go-cache")
+			cache := wrapper.GetCachePath()
 			logger.Infof("repository cache located at %s", cache)
 
 			m := installers.NewInstaller(cache, spec, specLock)
