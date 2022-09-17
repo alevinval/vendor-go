@@ -1,5 +1,10 @@
 package govendor
 
+import (
+	"os"
+	"path"
+)
+
 var _ Preset = (*DefaultPreset)(nil)
 
 // Preset interface used to customize the behaviour of the vendor library.
@@ -27,6 +32,9 @@ type Preset interface {
 	// ForceFilters flag returns wether the preset will force the overriding of
 	// the spec or dependency filters to the preset ones
 	ForceFilters() bool
+
+	// GetCachePath returns the path where the repository cache will be kept
+	GetCachePath() string
 }
 
 // DefaultPreset provides the default configuration for the vendor library.
@@ -58,4 +66,13 @@ func (dp *DefaultPreset) GetFiltersForDependency(*Dependency) *Filters {
 
 func (dp *DefaultPreset) ForceFilters() bool {
 	return false
+}
+
+func (dp *DefaultPreset) GetCachePath() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		logger.Warnf("Cannot find user HOME dir, using tempdir instead")
+		return os.TempDir()
+	}
+	return path.Join(homeDir, ".go-vendor-cache")
 }
