@@ -23,44 +23,47 @@ func (tp *TestPreset) GetSpecLockFilename() string {
 	return "some-spec-lock-filename"
 }
 
-func (tp *TestPreset) GetExtensions() []string {
-	return []string{"preset-extension"}
+func (tp *TestPreset) GetFilters() *Filters {
+	return NewFilters().
+		AddExtension("preset-extension").
+		AddTarget("preset-target").
+		AddIgnore("preset-ignore")
 }
 
-func (tp *TestPreset) GetTargets() []string {
-	return []string{"preset-target"}
-}
-
-func (tp *TestPreset) GetIgnores() []string {
-	return []string{"preset-ignore"}
-}
-
-func (tp *TestPreset) GetDepExtensions(dep *Dependency) []string {
-	target := fmt.Sprintf("preset-extension-for-%s", dep.URL)
-	return []string{target}
-}
-
-func (tp *TestPreset) GetDepTargets(dep *Dependency) []string {
+func (tp *TestPreset) GetFiltersForDependency(dep *Dependency) *Filters {
+	extension := fmt.Sprintf("preset-extension-for-%s", dep.URL)
 	target := fmt.Sprintf("preset-target-for-%s", dep.URL)
-	return []string{target}
-}
-
-func (tp *TestPreset) GetDepIgnores(dep *Dependency) []string {
 	ignore := fmt.Sprintf("preset-ignore-for-%s", dep.URL)
-	return []string{ignore}
+	return NewFilters().
+		AddExtension(extension).
+		AddTarget(target).
+		AddIgnore(ignore)
+
 }
 
 func TestNewSpec_LoadsPreset(t *testing.T) {
 	spec := NewSpec(&TestPreset{})
+	dep := NewDependency("some-url", "some-branch")
+	spec.Add(dep)
+
+	expectedSpecFilters := NewFilters().
+		AddExtension("preset-extension").
+		AddTarget("preset-target").
+		AddIgnore("preset-ignore")
+
+	expectedDependencyFilters := NewFilters().
+		AddExtension("preset-extension-for-some-url").
+		AddTarget("preset-target-for-some-url").
+		AddIgnore("preset-ignore-for-some-url")
 
 	assert.Equal(t, &TestPreset{}, spec.preset)
-	assert.Equal(t, []string{"preset-extension"}, spec.Extensions)
-	assert.Equal(t, []string{"preset-target"}, spec.Targets)
-	assert.Equal(t, []string{"preset-ignore"}, spec.Ignores)
+	assert.Equal(t, "test-preset", spec.PresetName)
+	assert.Equal(t, expectedSpecFilters, spec.Filters)
+	assert.Equal(t, expectedDependencyFilters, spec.Deps[0].Filters)
 }
 
 func TestSpecAdd_AddsDeps(t *testing.T) {
-	sut := NewSpec(nil)
+	sut := NewSpec(&TestPreset{})
 	assert.Empty(t, sut.Deps)
 
 	dep := NewDependency("some-url", "some-branch")
@@ -71,18 +74,21 @@ func TestSpecAdd_AddsDeps(t *testing.T) {
 
 func TestSpecAdd_WhenDepAlreadyPresent_UpdatesExistingDep(t *testing.T) {
 	dep := NewDependency("some-url", "some-branch")
-	dep.Targets = []string{"to-be-overwritten-target"}
-	dep.Ignores = []string{"to-be-overwritten-ignore"}
+	dep.Filters = NewFilters().
+		AddExtension("to-be-replaced").
+		AddTarget("to-be-replaced").
+		AddIgnore("to-be-replaced")
 
-	sut := NewSpec(&TestPreset{})
+	sut := NewSpec(nil)
 	sut.Deps = append(sut.Deps, dep)
 
 	other := NewDependency("some-url", "other-branch")
-	other.Targets = []string{"other-target"}
-	other.Ignores = []string{"other-ignore"}
+	other.Filters = NewFilters().
+		AddExtension("other-extension").
+		AddTarget("other-target").
+		AddIgnore("other-ignore")
 	sut.Add(other)
 
 	assert.Equal(t, []*Dependency{dep}, sut.Deps)
-	assert.Equal(t, []string{"other-target", "preset-target-for-some-url"}, sut.Deps[0].Targets)
-	assert.Equal(t, []string{"other-ignore", "preset-ignore-for-some-url"}, sut.Deps[0].Ignores)
+	assert.Equal(t, other.Filters, sut.Deps[0].Filters)
 }

@@ -8,29 +8,26 @@ import (
 )
 
 type PathSelector struct {
-	Targets    []string
-	Ignores    []string
-	Extensions []string
+	filters *govendor.Filters
 }
 
 func NewPathSelector(spec *govendor.Spec, dep *govendor.Dependency) *PathSelector {
+	filters := spec.Filters.Clone().ApplyFilters(dep.Filters)
 	return &PathSelector{
-		Targets:    append(spec.Targets, dep.Targets...),
-		Ignores:    append(spec.Ignores, dep.Ignores...),
-		Extensions: append(spec.Extensions, dep.Extensions...),
+		filters,
 	}
 }
 
 func (sel *PathSelector) Select(path string) bool {
-	return isTarget(path, sel.Targets) && hasExt(path, sel.Extensions) && !isIgnored(path, sel.Ignores)
+	return sel.isTarget(path) && sel.hasExt(path) && !sel.isIgnored(path)
 }
 
-func isTarget(path string, targets []string) bool {
-	if len(targets) == 0 {
+func (sel *PathSelector) isTarget(path string) bool {
+	if len(sel.filters.Targets) == 0 {
 		return true
 	}
 
-	for _, target := range targets {
+	for _, target := range sel.filters.Targets {
 		if hasPrefix(path, target) {
 			return true
 		}
@@ -38,12 +35,12 @@ func isTarget(path string, targets []string) bool {
 	return false
 }
 
-func hasExt(path string, extensions []string) bool {
+func (sel *PathSelector) hasExt(path string) bool {
 	ext := filepath.Ext(path)
 	if ext == "" {
 		return false
 	}
-	for _, targetExt := range extensions {
+	for _, targetExt := range sel.filters.Extensions {
 		// Ignore initial dot that filepath.Ext returns
 		if strings.EqualFold(ext[1:], targetExt) {
 			return true
@@ -53,8 +50,8 @@ func hasExt(path string, extensions []string) bool {
 	return false
 }
 
-func isIgnored(path string, ignores []string) bool {
-	for _, prefix := range ignores {
+func (sel *PathSelector) isIgnored(path string) bool {
+	for _, prefix := range sel.filters.Ignores {
 		if hasPrefix(path, prefix) {
 			return true
 		}

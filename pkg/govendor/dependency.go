@@ -6,12 +6,9 @@ import (
 )
 
 type Dependency struct {
-	URL    string `yaml:"url"`
-	Branch string `yaml:"branch"`
-
-	Extensions []string `yaml:"extensions,omitempty"`
-	Targets    []string `yaml:"targets,omitempty"`
-	Ignores    []string `yaml:"ignores,omitempty"`
+	URL     string   `yaml:"url"`
+	Branch  string   `yaml:"branch"`
+	Filters *Filters `yaml:",inline"`
 }
 
 type DependencyLock struct {
@@ -21,11 +18,9 @@ type DependencyLock struct {
 
 func NewDependency(url, branch string) *Dependency {
 	return &Dependency{
-		URL:        url,
-		Branch:     branch,
-		Extensions: []string{},
-		Targets:    []string{},
-		Ignores:    []string{},
+		URL:     url,
+		Branch:  branch,
+		Filters: NewFilters(),
 	}
 }
 
@@ -45,7 +40,5 @@ func (d *Dependency) ID() string {
 func (d *Dependency) Update(other *Dependency) {
 	d.URL = other.URL
 	d.Branch = other.Branch
-	d.Extensions = other.Extensions
-	d.Targets = other.Targets
-	d.Ignores = other.Ignores
+	d.Filters = other.Filters.Clone()
 }

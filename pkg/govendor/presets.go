@@ -9,14 +9,8 @@ type Preset interface {
 	GetPresetName() string
 	GetSpecFilename() string
 	GetSpecLockFilename() string
-
-	GetExtensions() []string
-	GetTargets() []string
-	GetIgnores() []string
-
-	GetDepExtensions(dep *Dependency) []string
-	GetDepTargets(dep *Dependency) []string
-	GetDepIgnores(dep *Dependency) []string
+	GetFilters() *Filters
+	GetFiltersForDependency(*Dependency) *Filters
 }
 
 // DefaultPreset provides the default configuration for the vendor library.
@@ -34,26 +28,10 @@ func (dp *DefaultPreset) GetSpecLockFilename() string {
 	return SPEC_LOCK_FILENAME
 }
 
-func (dp *DefaultPreset) GetExtensions() []string {
-	return []string{}
+func (dp *DefaultPreset) GetFilters() *Filters {
+	return NewFilters()
 }
 
-func (dp *DefaultPreset) GetTargets() []string {
-	return []string{}
-}
-
-func (dp *DefaultPreset) GetIgnores() []string {
-	return []string{}
-}
-
-func (dp *DefaultPreset) GetDepExtensions(*Dependency) []string {
-	return []string{}
-}
-
-func (dp *DefaultPreset) GetDepTargets(*Dependency) []string {
-	return []string{}
-}
-
-func (dp *DefaultPreset) GetDepIgnores(*Dependency) []string {
-	return []string{}
+func (dp *DefaultPreset) GetFiltersForDependency(*Dependency) *Filters {
+	return NewFilters()
 }

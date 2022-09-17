@@ -9,32 +9,35 @@ import (
 
 func TestPathSelector(t *testing.T) {
 	spec := govendor.NewSpec(nil)
-	spec.Targets = []string{"spec-target"}
-	spec.Ignores = []string{"spec-ignores"}
-	spec.Extensions = []string{"spec-extensions"}
+	spec.Filters = govendor.NewFilters().
+		AddExtension("spec-extension").
+		AddTarget("spec-target").
+		AddIgnore("spec-ignore")
 
 	dep := govendor.NewDependency("some-url", "some-branch")
-	dep.Targets = []string{"dep-target"}
-	dep.Ignores = []string{"dep-ignores"}
-	dep.Extensions = []string{"dep-extensions"}
+	dep.Filters = govendor.NewFilters().
+		AddExtension("dep-extension").
+		AddTarget("dep-target").
+		AddIgnore("dep-ignore")
 
 	sut := NewPathSelector(spec, dep)
-	assert.Equal(t, []string{"spec-target", "dep-target"}, sut.Targets)
-	assert.Equal(t, []string{"spec-ignores", "dep-ignores"}, sut.Ignores)
-	assert.Equal(t, []string{"spec-extensions", "dep-extensions"}, sut.Extensions)
+	assert.Equal(t, spec.Filters.Clone().ApplyFilters(dep.Filters), sut.filters)
 }
 
 func TestPathSelectorSelect(t *testing.T) {
+	filtersWithTargets := govendor.NewFilters().
+		AddExtension("proto").
+		AddTarget("target/a").
+		AddIgnore("ignored/a", "target/a/ignored")
 	sutWithTargets := PathSelector{
-		Targets:    []string{"target/a"},
-		Ignores:    []string{"ignored/a", "target/a/ignored"},
-		Extensions: []string{"proto"},
+		filters: filtersWithTargets,
 	}
 
+	filtersWithoutTargets := govendor.NewFilters().
+		AddExtension("proto").
+		AddIgnore("ignored/a", "target/a/ignored")
 	sutWithoutTargets := PathSelector{
-		Targets:    []string{},
-		Ignores:    []string{"ignored/a", "target/a/ignored"},
-		Extensions: []string{"proto"},
+		filters: filtersWithoutTargets,
 	}
 
 	for _, sut := range []PathSelector{sutWithTargets, sutWithoutTargets} {

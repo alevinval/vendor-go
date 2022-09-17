@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/alevinval/vendor-go/internal/log"
-	"github.com/alevinval/vendor-go/internal/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -19,11 +18,9 @@ var logger = log.GetLogger()
 
 type Spec struct {
 	Version    string
-	Preset     string        `yaml:"preset"`
+	PresetName string        `yaml:"preset"`
 	VendorDir  string        `yaml:"vendor_dir,omitempty"`
-	Extensions []string      `yaml:"extensions,omitempty"`
-	Targets    []string      `yaml:"targets,omitempty"`
-	Ignores    []string      `yaml:"ignores,omitempty"`
+	Filters    *Filters      `yaml:",inline"`
 	Deps       []*Dependency `yaml:"deps"`
 	preset     Preset        `yaml:"-"`
 }
@@ -52,12 +49,10 @@ func NewSpec(preset Preset) *Spec {
 	preset = checkPreset(preset, true)
 
 	spec := &Spec{
-		Version:    VERSION,
-		VendorDir:  "vendor/",
-		Extensions: []string{},
-		Targets:    []string{},
-		Ignores:    []string{},
-		Deps:       []*Dependency{},
+		Version:   VERSION,
+		VendorDir: "vendor/",
+		Filters:   NewFilters(),
+		Deps:      []*Dependency{},
 	}
 	spec.applyPreset(preset)
 	return spec
@@ -83,14 +78,17 @@ func (s *Spec) Save() error {
 
 func (s *Spec) applyPreset(preset Preset) {
 	s.preset = preset
-	s.Preset = preset.GetPresetName()
-	s.Extensions = utils.Union(s.Extensions, s.preset.GetExtensions())
-	s.Targets = utils.Union(s.Targets, s.preset.GetTargets())
-	s.Ignores = utils.Union(s.Ignores, s.preset.GetIgnores())
+	s.PresetName = preset.GetPresetName()
+
+	if s.Filters == nil {
+		s.Filters = NewFilters()
+	}
+	s.Filters.ApplyPreset(preset)
 	for _, dep := range s.Deps {
-		dep.Extensions = utils.Union(dep.Extensions, s.preset.GetDepExtensions(dep))
-		dep.Targets = utils.Union(dep.Targets, s.preset.GetDepTargets(dep))
-		dep.Ignores = utils.Union(dep.Ignores, s.preset.GetDepIgnores(dep))
+		if dep.Filters == nil {
+			dep.Filters = NewFilters()
+		}
+		dep.Filters.ApplyDep(preset, dep)
 	}
 }
 
