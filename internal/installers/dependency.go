@@ -38,15 +38,22 @@ func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
 	}
 
-	if d.depLock != nil {
-		logger.Infof("installing %s", color.CyanString(d.dep.URL))
-		d.repo.CheckoutCommit(d.depLock.Commit)
-	} else {
-		logger.Infof("installing %s@%s", color.CyanString(d.dep.URL), color.YellowString(d.dep.Branch))
-		d.repo.CheckoutBranch(d.dep.Branch)
-		d.repo.Pull()
+	err = d.repo.Fetch()
+	if err != nil {
+		return nil, err
 	}
 
+	if d.depLock == nil {
+		logger.Infof("installing %s@%s", color.CyanString(d.dep.URL), color.YellowString(d.dep.Branch))
+		err = d.repo.Reset(d.dep.Branch)
+	} else {
+		logger.Infof("installing %s@%s", color.CyanString(d.dep.URL), color.YellowString((d.depLock.Commit)))
+		err = d.repo.Reset(d.depLock.Commit)
+	}
+
+	if err != nil {
+		return nil, err
+	}
 	return d.importFiles()
 }
 
@@ -58,9 +65,15 @@ func (d *dependencyInstaller) Update() (*govendor.DependencyLock, error) {
 
 	logger.Infof("updating %s@%s", color.CyanString("%s", d.dep.URL), color.YellowString(d.dep.Branch))
 
-	d.repo.Fetch()
-	d.repo.CheckoutBranch(d.dep.Branch)
-	d.repo.Pull()
+	err = d.repo.Fetch()
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.repo.Reset(d.dep.Branch)
+	if err != nil {
+		return nil, err
+	}
 
 	return d.importFiles()
 }
