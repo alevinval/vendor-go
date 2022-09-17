@@ -1,6 +1,7 @@
 package govendor
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -8,11 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const (
-	VERSION            = "0.2.0"
-	SPEC_FILENAME      = ".vendor.yml"
-	SPEC_LOCK_FILENAME = ".vendor-lock.yml"
-)
+const VERSION = "0.2.0"
 
 var logger = log.GetLogger()
 
@@ -28,17 +25,16 @@ type Spec struct {
 func LoadSpec(preset Preset) (*Spec, error) {
 	preset = checkPreset(preset, true)
 
-	data, err := os.ReadFile(preset.GetSpecFilename())
+	filename := preset.GetSpecFilename()
+	data, err := os.ReadFile(filename)
 	if err != nil {
-		logger.Errorf("cannot read %s: %s", preset.GetSpecFilename(), err)
-		return nil, err
+		return nil, fmt.Errorf("cannot read %q: %w", filename, err)
 	}
 
 	spec := &Spec{}
 	err = yaml.Unmarshal(data, spec)
 	if err != nil {
-		logger.Errorf("cannot read %s: %s", preset.GetSpecFilename(), err)
-		return nil, err
+		return nil, fmt.Errorf("cannot parse %q: %w", filename, err)
 	}
 
 	spec.applyPreset(preset)
@@ -47,7 +43,6 @@ func LoadSpec(preset Preset) (*Spec, error) {
 
 func NewSpec(preset Preset) *Spec {
 	preset = checkPreset(preset, true)
-
 	spec := &Spec{
 		Version: VERSION,
 		Filters: NewFilters(),
@@ -67,12 +62,16 @@ func (s *Spec) Add(dependency *Dependency) {
 }
 
 func (s *Spec) Save() error {
+	filename := s.preset.GetSpecFilename()
 	data, err := toYaml(s)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot save %q: %w", filename, err)
 	}
-
-	return os.WriteFile(s.preset.GetSpecFilename(), data, os.ModePerm)
+	err = os.WriteFile(filename, data, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("cannot save %q: %w", filename, err)
+	}
+	return nil
 }
 
 func (s *Spec) applyPreset(preset Preset) {
