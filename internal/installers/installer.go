@@ -1,6 +1,7 @@
 package installers
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/alevinval/vendor-go/internal"
@@ -14,9 +15,9 @@ type Installer struct {
 	cacheRoot string
 }
 
-func NewInstaller(cache string, spec *govendor.Spec, lock *govendor.SpecLock) *Installer {
+func NewInstaller(preset govendor.Preset, spec *govendor.Spec, lock *govendor.SpecLock) *Installer {
 	return &Installer{
-		cacheRoot: cache,
+		cacheRoot: preset.GetCachePath(),
 		spec:      spec,
 		lock:      lock,
 	}
@@ -40,7 +41,7 @@ func (in *Installer) run(action actionFunc) error {
 
 		newLock, err := action(depInstaller)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot complete action: %w", err)
 		}
 
 		logger.Infof("  🔒 %s", color.YellowString(newLock.Commit))
