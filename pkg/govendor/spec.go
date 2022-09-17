@@ -17,7 +17,7 @@ const (
 var logger = log.GetLogger()
 
 type Spec struct {
-	Version    string
+	Version    string        `yaml:"version"`
 	PresetName string        `yaml:"preset"`
 	VendorDir  string        `yaml:"vendor_dir,omitempty"`
 	Filters    *Filters      `yaml:",inline"`

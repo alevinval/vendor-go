@@ -19,22 +19,21 @@ func LoadSpecLock(preset Preset) (*SpecLock, error) {
 	fileName := preset.GetSpecLockFilename()
 	data, err := os.ReadFile(fileName)
 	if err != nil {
-		logger.Errorf("cannot read %s: %s", fileName, err)
-		return nil, err
+		return NewSpecLock(preset), nil
 	}
 
-	spec := &SpecLock{}
+	spec := NewSpecLock(preset)
 	err = yaml.Unmarshal(data, spec)
 	if err != nil {
 		logger.Errorf("cannot read %s: %s", fileName, err)
 		return nil, err
 	}
 
-	spec.preset = preset
 	return spec, nil
 }
 
 func NewSpecLock(preset Preset) *SpecLock {
+	preset = checkPreset(preset, false)
 	return &SpecLock{
 		Version: VERSION,
 		Deps:    []*DependencyLock{},
