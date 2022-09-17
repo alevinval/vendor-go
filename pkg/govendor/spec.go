@@ -52,7 +52,7 @@ func NewSpec(preset Preset) *Spec {
 	return spec
 }
 
-func (s *Spec) Add(dependency *Dependency) {
+func (s *Spec) AddDependency(dependency *Dependency) {
 	if dep, ok := s.findDep(dependency); ok {
 		dep.Update(dependency)
 	} else {

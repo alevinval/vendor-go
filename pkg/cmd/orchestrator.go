@@ -109,7 +109,7 @@ func (co *CmdOrchestrator) AddDependency(url, branch string) error {
 	}
 
 	dep := govendor.NewDependency(url, branch)
-	spec.Add(dep)
+	spec.AddDependency(dep)
 
 	err = spec.Save()
 	if err != nil {

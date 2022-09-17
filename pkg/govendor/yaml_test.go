@@ -13,7 +13,7 @@ func TestSpecYamlSerialization(t *testing.T) {
 		AddTarget("dep-target").
 		AddIgnore("dep-ignore")
 	spec := NewSpec(&TestPreset{})
-	spec.Add(dep)
+	spec.AddDependency(dep)
 
 	data, err := toYaml(spec)
 	assert.NoError(t, err)
