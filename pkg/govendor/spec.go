@@ -49,10 +49,9 @@ func NewSpec(preset Preset) *Spec {
 	preset = checkPreset(preset, true)
 
 	spec := &Spec{
-		Version:   VERSION,
-		VendorDir: "vendor/",
-		Filters:   NewFilters(),
-		Deps:      []*Dependency{},
+		Version: VERSION,
+		Filters: NewFilters(),
+		Deps:    []*Dependency{},
 	}
 	spec.applyPreset(preset)
 	return spec
@@ -78,17 +77,27 @@ func (s *Spec) Save() error {
 
 func (s *Spec) applyPreset(preset Preset) {
 	s.preset = preset
+	s.VendorDir = preset.GetVendorDir()
 	s.PresetName = preset.GetPresetName()
 
-	if s.Filters == nil {
-		s.Filters = NewFilters()
-	}
-	s.Filters.ApplyPreset(preset)
-	for _, dep := range s.Deps {
-		if dep.Filters == nil {
-			dep.Filters = NewFilters()
+	if preset.ForceFilters() {
+		s.Filters = preset.GetFilters()
+	} else {
+		if s.Filters == nil {
+			s.Filters = NewFilters()
 		}
-		dep.Filters.ApplyDep(preset, dep)
+		s.Filters.ApplyPreset(preset)
+	}
+
+	for _, dep := range s.Deps {
+		if preset.ForceFilters() {
+			dep.Filters = preset.GetFiltersForDependency(dep)
+		} else {
+			if dep.Filters == nil {
+				dep.Filters = NewFilters()
+			}
+			dep.Filters.ApplyDep(preset, dep)
+		}
 	}
 }
 
