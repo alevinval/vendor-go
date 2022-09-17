@@ -3,16 +3,16 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/alevinval/vendor-go/internal/log"
 	"github.com/alevinval/vendor-go/pkg/govendor"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/spf13/cobra"
 )
 
 var (
-	logger = log.GetLogger()
-
 	isDebugEnabled bool
+	LogLevel       = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 )
 
 func newRootCmd(commandName string) *cobra.Command {
@@ -21,7 +21,7 @@ func newRootCmd(commandName string) *cobra.Command {
 		Short: fmt.Sprintf("[%s] %s is a flexible and customizable vendoring tool", govendor.VERSION, commandName),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if isDebugEnabled {
-				log.EnableDebug()
+				LogLevel.SetLevel(zapcore.DebugLevel)
 			}
 		},
 	}
@@ -34,7 +34,7 @@ func newInitCmd(co *CmdOrchestrator) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := co.Init()
 			if err != nil {
-				logger.Errorf("%s", err)
+				zap.S().Errorf("%s", err)
 			}
 		},
 	}
@@ -50,7 +50,7 @@ func newAddCmd(co *CmdOrchestrator) *cobra.Command {
 			branch := args[1]
 			err := co.AddDependency(url, branch)
 			if err != nil {
-				logger.Errorf("%s", err)
+				zap.S().Errorf("%s", err)
 			}
 		},
 	}
@@ -63,7 +63,7 @@ func newInstallCmd(co *CmdOrchestrator) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := co.Install()
 			if err != nil {
-				logger.Errorf("%s", err)
+				zap.S().Errorf("%s", err)
 			}
 		},
 	}
@@ -76,7 +76,7 @@ func newUpdateCmd(co *CmdOrchestrator) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := co.Update()
 			if err != nil {
-				logger.Errorf("%s", err)
+				zap.S().Errorf("%s", err)
 			}
 		},
 	}

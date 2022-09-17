@@ -5,13 +5,11 @@ import (
 	"io/fs"
 
 	"github.com/alevinval/vendor-go/internal"
-	"github.com/alevinval/vendor-go/internal/log"
 	"github.com/alevinval/vendor-go/internal/paths"
 	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/fatih/color"
+	"go.uber.org/zap"
 )
-
-var logger = log.GetLogger()
 
 type dependencyInstaller struct {
 	dep           *govendor.Dependency
@@ -44,13 +42,13 @@ func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
 	}
 
 	if d.depLock == nil {
-		logger.Infof("installing %s@%s",
+		zap.S().Infof("installing %s@%s",
 			color.CyanString(d.dep.URL),
 			color.YellowString(d.dep.Branch),
 		)
 		err = d.repo.Reset(d.dep.Branch)
 	} else {
-		logger.Infof("installing %s@%s",
+		zap.S().Infof("installing %s@%s",
 			color.CyanString(d.dep.URL),
 			color.YellowString(
 				fmt.Sprintf("%.8s", d.depLock.Commit),
@@ -71,7 +69,7 @@ func (d *dependencyInstaller) Update() (*govendor.DependencyLock, error) {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
 	}
 
-	logger.Infof("updating %s@%s",
+	zap.S().Infof("updating %s@%s",
 		color.CyanString("%s", d.dep.URL),
 		color.YellowString(d.dep.Branch),
 	)

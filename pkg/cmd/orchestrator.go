@@ -7,6 +7,7 @@ import (
 	"github.com/alevinval/vendor-go/internal/installers"
 	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/fatih/color"
+	"go.uber.org/zap"
 )
 
 type CmdOrchestrator struct {
@@ -30,7 +31,7 @@ func (co *CmdOrchestrator) Init() error {
 		return fmt.Errorf("failed initializing: %w", err)
 	}
 
-	logger.Infof("%s has been created", co.preset.GetSpecFilename())
+	zap.S().Infof("%s has been created", co.preset.GetSpecFilename())
 	return nil
 }
 
@@ -46,7 +47,7 @@ func (co *CmdOrchestrator) Install() error {
 	}
 
 	cache := co.preset.GetCachePath()
-	logger.Infof("repository cache located at %s", cache)
+	zap.S().Infof("repository cache located at %s", cache)
 
 	m := installers.NewInstaller(co.preset, spec, specLock)
 	err = m.Install()
@@ -64,7 +65,7 @@ func (co *CmdOrchestrator) Install() error {
 		return fmt.Errorf("install failed: %w", err)
 	}
 
-	logger.Infof("install success ✅")
+	zap.S().Infof("install success ✅")
 	return nil
 }
 
@@ -80,7 +81,7 @@ func (co *CmdOrchestrator) Update() error {
 	}
 
 	cache := co.preset.GetCachePath()
-	logger.Infof("repository cache located at %s", cache)
+	zap.S().Infof("repository cache located at %s", cache)
 
 	m := installers.NewInstaller(co.preset, spec, specLock)
 	err = m.Update()
@@ -98,7 +99,7 @@ func (co *CmdOrchestrator) Update() error {
 		return fmt.Errorf("update failed: %w", err)
 	}
 
-	logger.Infof("update success ✅")
+	zap.S().Infof("update success ✅")
 	return nil
 }
 
@@ -116,7 +117,7 @@ func (co *CmdOrchestrator) AddDependency(url, branch string) error {
 		return fmt.Errorf("failed adding dependency: %w", err)
 	}
 
-	logger.Infof("added dependency %s@%s",
+	zap.S().Infof("added dependency %s@%s",
 		color.CyanString(url),
 		color.YellowString(branch),
 	)
