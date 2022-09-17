@@ -44,63 +44,50 @@ func (g Git) Clone(url, branch, path string) error {
 	return err
 }
 
-func (g Git) CheckoutCommit(commit, path string) error {
-	repo, err := git.PlainOpen(path)
-	if err != nil {
-		return err
-	}
-
-	wt, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	checkoutOpts := &git.CheckoutOptions{
-		Hash:  plumbing.NewHash(commit),
-		Force: true,
-	}
-	return wt.Checkout(checkoutOpts)
-}
-
-func (g Git) CheckoutBranch(branch, path string) error {
-	repo, err := git.PlainOpen(path)
-	if err != nil {
-		return err
-	}
-
-	wt, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	checkoutOpts := &git.CheckoutOptions{
-		Branch: plumbing.NewRemoteReferenceName("origin", branch),
-		Force:  true,
-	}
-	return wt.Checkout(checkoutOpts)
-}
-
-func (g Git) Pull(path string) error {
-	repo, err := git.PlainOpen(path)
-	if err != nil {
-		return err
-	}
-
-	wt, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	pullOpts := &git.PullOptions{Force: true}
-	return wt.Pull(pullOpts)
-}
-
 func (g Git) Fetch(path string) error {
 	repo, err := git.PlainOpen(path)
 	if err != nil {
 		return err
 	}
 
-	fetchOpts := &git.FetchOptions{Force: true}
-	return repo.Fetch(fetchOpts)
+	fetchOpts := &git.FetchOptions{
+		Force: true,
+		Tags:  git.AllTags,
+	}
+	err = repo.Fetch(fetchOpts)
+	if err == git.NoErrAlreadyUpToDate {
+		return nil
+	}
+	return err
+}
+
+func (g Git) Reset(path, refname string) error {
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return err
+	}
+
+	hash, err := repo.ResolveRevision(plumbing.Revision(refname))
+	if err != nil {
+		return err
+	}
+
+	wt, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+
+	cleanOpts := &git.CleanOptions{
+		Dir: true,
+	}
+	err = wt.Clean(cleanOpts)
+	if err != nil {
+		return err
+	}
+
+	opts := &git.ResetOptions{
+		Commit: *hash,
+		Mode:   git.HardReset,
+	}
+	return wt.Reset(opts)
 }
