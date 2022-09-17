@@ -40,6 +40,10 @@ func (tp *TestPreset) ForceFilters() bool {
 	return tp.force
 }
 
+func (tp *TestPreset) GetCachePath() string {
+	return ".test-cache-path"
+}
+
 func (tp *TestPreset) GetFiltersForDependency(dep *Dependency) *Filters {
 	extension := fmt.Sprintf("preset-extension-for-%s", dep.URL)
 	target := fmt.Sprintf("preset-target-for-%s", dep.URL)
