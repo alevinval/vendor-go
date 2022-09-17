@@ -9,10 +9,16 @@ import (
 
 var _ Preset = (*TestPreset)(nil)
 
-type TestPreset struct{}
+type TestPreset struct {
+	force bool
+}
 
 func (tp *TestPreset) GetPresetName() string {
 	return "test-preset"
+}
+
+func (*TestPreset) GetVendorDir() string {
+	return "test-vendor-dir"
 }
 
 func (tp *TestPreset) GetSpecFilename() string {
@@ -28,6 +34,10 @@ func (tp *TestPreset) GetFilters() *Filters {
 		AddExtension("preset-extension").
 		AddTarget("preset-target").
 		AddIgnore("preset-ignore")
+}
+
+func (tp *TestPreset) ForceFilters() bool {
+	return tp.force
 }
 
 func (tp *TestPreset) GetFiltersForDependency(dep *Dependency) *Filters {
@@ -91,4 +101,26 @@ func TestSpecAdd_WhenDepAlreadyPresent_UpdatesExistingDep(t *testing.T) {
 
 	assert.Equal(t, []*Dependency{dep}, sut.Deps)
 	assert.Equal(t, other.Filters, sut.Deps[0].Filters)
+}
+
+func TestSpec_WhenForceFilters_OverridesFilters(t *testing.T) {
+	preset := &TestPreset{true}
+
+	dep := NewDependency("some-url", "some-branch")
+	dep.Filters = NewFilters().
+		AddExtension("to-be-replaced").
+		AddTarget("to-be-replaced").
+		AddIgnore("to-be-replaced")
+
+	sut := NewSpec(nil)
+	sut.Filters = NewFilters().
+		AddExtension("to-be-replaced").
+		AddTarget("to-be-replaced").
+		AddIgnore("to-be-replaced")
+	sut.Add(dep)
+
+	sut.applyPreset(preset)
+
+	assert.Equal(t, preset.GetFilters(), sut.Filters)
+	assert.Equal(t, preset.GetFiltersForDependency(dep), sut.Deps[0].Filters)
 }
