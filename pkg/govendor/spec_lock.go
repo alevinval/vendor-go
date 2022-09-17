@@ -26,7 +26,7 @@ func LoadSpecLock(preset Preset) (*SpecLock, error) {
 	spec := NewSpecLock(preset)
 	err = yaml.Unmarshal(data, spec)
 	if err != nil {
-		return nil, fmt.Errorf("cannot read %s: %w", filename, err)
+		return nil, fmt.Errorf("cannot read: %w", err)
 	}
 
 	return spec, nil
@@ -63,12 +63,12 @@ func (s *SpecLock) Save() error {
 	filename := s.preset.GetSpecLockFilename()
 	data, err := toYaml(s)
 	if err != nil {
-		return fmt.Errorf("cannot save %q: %w", filename, err)
+		return fmt.Errorf("cannot save:  %w", err)
 	}
 
 	err = os.WriteFile(filename, data, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("cannot save %q: %w", filename, err)
+		return fmt.Errorf("cannot save: %w", err)
 	}
 
 	return nil

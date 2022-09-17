@@ -26,13 +26,13 @@ func LoadSpec(preset Preset) (*Spec, error) {
 	filename := preset.GetSpecFilename()
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, fmt.Errorf("cannot read %q: %w", filename, err)
+		return nil, fmt.Errorf("cannot read: %w", err)
 	}
 
 	spec := &Spec{}
 	err = yaml.Unmarshal(data, spec)
 	if err != nil {
-		return nil, fmt.Errorf("cannot parse %q: %w", filename, err)
+		return nil, fmt.Errorf("cannot parse: %w", err)
 	}
 
 	spec.applyPreset(preset)
@@ -63,11 +63,11 @@ func (s *Spec) Save() error {
 	filename := s.preset.GetSpecFilename()
 	data, err := toYaml(s)
 	if err != nil {
-		return fmt.Errorf("cannot save %q: %w", filename, err)
+		return fmt.Errorf("cannot save: %w", err)
 	}
 	err = os.WriteFile(filename, data, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("cannot save %q: %w", filename, err)
+		return fmt.Errorf("cannot save: %w", err)
 	}
 	return nil
 }
