@@ -81,6 +81,19 @@ func newUpdateCmd(co *CmdOrchestrator) *cobra.Command {
 	}
 }
 
+func newCleanCacheCmd(co *CmdOrchestrator) *cobra.Command {
+	return &cobra.Command{
+		Use:   "cleancache",
+		Short: "resets the repository cache",
+		Run: func(cmd *cobra.Command, args []string) {
+			err := co.CleanCache()
+			if err != nil {
+				log.S().Errorf("%s", err)
+			}
+		},
+	}
+}
+
 func NewVendorCmd(commandName string, preset govendor.Preset) *cobra.Command {
 	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
@@ -90,5 +103,6 @@ func NewVendorCmd(commandName string, preset govendor.Preset) *cobra.Command {
 	rootCmd.AddCommand(newAddCmd(orchestrator))
 	rootCmd.AddCommand(newInstallCmd(orchestrator))
 	rootCmd.AddCommand(newUpdateCmd(orchestrator))
+	rootCmd.AddCommand(newCleanCacheCmd(orchestrator))
 	return rootCmd
 }
