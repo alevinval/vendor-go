@@ -7,8 +7,8 @@ import (
 	"github.com/alevinval/vendor-go/internal"
 	"github.com/alevinval/vendor-go/internal/paths"
 	"github.com/alevinval/vendor-go/pkg/govendor"
+	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/fatih/color"
-	"go.uber.org/zap"
 )
 
 type dependencyInstaller struct {
@@ -42,13 +42,13 @@ func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
 	}
 
 	if d.depLock == nil {
-		zap.S().Infof("installing %s@%s",
+		log.S().Infof("installing %s@%s",
 			color.CyanString(d.dep.URL),
 			color.YellowString(d.dep.Branch),
 		)
 		err = d.repo.Reset(d.dep.Branch)
 	} else {
-		zap.S().Infof("installing %s@%s",
+		log.S().Infof("installing %s@%s",
 			color.CyanString(d.dep.URL),
 			color.YellowString(
 				fmt.Sprintf("%.8s", d.depLock.Commit),
@@ -69,7 +69,7 @@ func (d *dependencyInstaller) Update() (*govendor.DependencyLock, error) {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
 	}
 
-	zap.S().Infof("updating %s@%s",
+	log.S().Infof("updating %s@%s",
 		color.CyanString("%s", d.dep.URL),
 		color.YellowString(d.dep.Branch),
 	)

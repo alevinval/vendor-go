@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"go.uber.org/zap"
+	"github.com/alevinval/vendor-go/pkg/log"
 	"gopkg.in/yaml.v3"
 )
 
@@ -110,7 +110,7 @@ func (s *Spec) findDep(dependency *Dependency) (*Dependency, bool) {
 func checkPreset(preset Preset, warn bool) Preset {
 	if preset == nil {
 		if warn {
-			zap.S().Warnf("no preset has been provided, using default preset")
+			log.S().Warnf("no preset has been provided, using default preset")
 		}
 		return &DefaultPreset{}
 	}
@@ -121,7 +121,7 @@ func checkPreset(preset Preset, warn bool) Preset {
 			break
 		default:
 			if p.GetPresetName() == "default" {
-				zap.S().Warnf("custom preset injected, but the name is \"default\" which is used for the default preset name, this will be confusing for users, consider a different name for your preset")
+				log.S().Warnf("custom preset injected, but the name is \"default\" which is used for the default preset name, this will be confusing for users, consider a different name for your preset")
 			}
 		}
 	}

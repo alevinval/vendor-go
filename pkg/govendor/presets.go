@@ -4,7 +4,7 @@ import (
 	"os"
 	"path"
 
-	"go.uber.org/zap"
+	"github.com/alevinval/vendor-go/pkg/log"
 )
 
 var _ Preset = (*DefaultPreset)(nil)
@@ -73,7 +73,7 @@ func (dp *DefaultPreset) ForceFilters() bool {
 func (dp *DefaultPreset) GetCachePath() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		zap.S().Warnf("Cannot find user HOME dir, using tempdir instead")
+		log.S().Warnf("Cannot find user HOME dir, using tempdir instead")
 		return os.TempDir()
 	}
 	return path.Join(homeDir, ".go-vendor-cache")
