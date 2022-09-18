@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/fatih/color v1.13.0
 	github.com/go-git/go-git/v5 v5.4.2
+	github.com/rogpeppe/go-internal v1.9.0
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.8.0
 	gopkg.in/yaml.v3 v3.0.1

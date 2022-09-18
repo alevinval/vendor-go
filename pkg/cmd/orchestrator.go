@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path"
 
+	"github.com/alevinval/vendor-go/internal"
 	"github.com/alevinval/vendor-go/internal/installers"
 	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/alevinval/vendor-go/pkg/log"
@@ -36,6 +38,12 @@ func (co *CmdOrchestrator) Init() error {
 }
 
 func (co *CmdOrchestrator) Install() error {
+	lock, err := co.getCacheLock()
+	if err != nil {
+		return fmt.Errorf("cannot install: %w", err)
+	}
+	defer lock.Release()
+
 	spec, err := govendor.LoadSpec(co.preset)
 	if err != nil {
 		return fmt.Errorf("cannot install: %w", err)
@@ -70,6 +78,12 @@ func (co *CmdOrchestrator) Install() error {
 }
 
 func (co *CmdOrchestrator) Update() error {
+	lock, err := co.getCacheLock()
+	if err != nil {
+		return fmt.Errorf("cannot install: %w", err)
+	}
+	defer lock.Release()
+
 	spec, err := govendor.LoadSpec(co.preset)
 	if err != nil {
 		return fmt.Errorf("cannot update: %w", err)
@@ -122,4 +136,15 @@ func (co *CmdOrchestrator) AddDependency(url, branch string) error {
 		color.YellowString(branch),
 	)
 	return nil
+}
+
+func (co *CmdOrchestrator) getCacheLock() (*internal.Lock, error) {
+	lockPath := path.Join(co.preset.GetCacheDir(), "LOCK")
+	lock := internal.NewLock(lockPath).
+		WithWarn("cannot acquire cache lock, are you running multiple instances in parallel?")
+	err := lock.Acquire()
+	if err != nil {
+		return nil, fmt.Errorf("cannot acquire cache lock %q: %w", lockPath, err)
+	}
+	return lock, nil
 }
