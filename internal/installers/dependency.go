@@ -31,7 +31,13 @@ func newDependencyInstaller(spec *govendor.Spec, dep *govendor.Dependency, depLo
 }
 
 func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
-	err := d.repo.Ensure()
+	err := d.repo.Acquire()
+	if err != nil {
+		return nil, fmt.Errorf("cannot acquire repository lock: %w", err)
+	}
+	defer d.repo.Release()
+
+	err = d.repo.Ensure()
 	if err != nil {
 		return nil, fmt.Errorf("cannot ensure repository: %w", err)
 	}
@@ -59,7 +65,13 @@ func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
 }
 
 func (d *dependencyInstaller) Update() (*govendor.DependencyLock, error) {
-	err := d.repo.Ensure()
+	err := d.repo.Acquire()
+	if err != nil {
+		return nil, fmt.Errorf("cannot acquire repository lock: %w", err)
+	}
+	defer d.repo.Release()
+
+	err = d.repo.Ensure()
 	if err != nil {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
 	}
