@@ -1,12 +1,10 @@
-package cmd
+package internal
 
 import (
 	"fmt"
 	"os"
 	"path"
 
-	"github.com/alevinval/vendor-go/internal"
-	"github.com/alevinval/vendor-go/internal/installers"
 	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/fatih/color"
@@ -57,7 +55,7 @@ func (co *CmdOrchestrator) Install() error {
 	cacheDir := co.preset.GetCacheDir()
 	log.S().Infof("repository cache located at %s", cacheDir)
 
-	m := installers.NewInstaller(cacheDir, spec, specLock)
+	m := NewInstaller(cacheDir, spec, specLock)
 	err = m.Install()
 	if err != nil {
 		return fmt.Errorf("install failed: %w", err)
@@ -97,7 +95,7 @@ func (co *CmdOrchestrator) Update() error {
 	cacheDir := co.preset.GetCacheDir()
 	log.S().Infof("repository cache located at %s", cacheDir)
 
-	m := installers.NewInstaller(cacheDir, spec, specLock)
+	m := NewInstaller(cacheDir, spec, specLock)
 	err = m.Update()
 	if err != nil {
 		return fmt.Errorf("update failed: %w", err)
@@ -139,21 +137,21 @@ func (co *CmdOrchestrator) AddDependency(url, branch string) error {
 }
 
 func (co *CmdOrchestrator) CleanCache() error {
-	err := internal.ResetCacheDir(co.preset)
+	err := resetCacheDir(co.preset)
 	if err != nil {
 		return fmt.Errorf("cannot clean cache: %w", err)
 	}
 	return nil
 }
 
-func (co *CmdOrchestrator) getCacheLock() (*internal.Lock, error) {
-	err := internal.EnsureCacheDir(co.preset)
+func (co *CmdOrchestrator) getCacheLock() (*Lock, error) {
+	err := ensureCacheDir(co.preset)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create cache: %w", err)
 	}
 
 	lockPath := path.Join(co.preset.GetCacheDir(), "LOCK")
-	lock := internal.NewLock(lockPath).
+	lock := NewLock(lockPath).
 		WithWarn("cannot acquire cache lock, are you running multiple instances in parallel?")
 	err = lock.Acquire()
 	if err != nil {

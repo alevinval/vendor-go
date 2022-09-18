@@ -13,7 +13,7 @@ const (
 	REPOS_DIR = "repos"
 )
 
-func EnsureCacheDir(preset govendor.Preset) error {
+func ensureCacheDir(preset govendor.Preset) error {
 	cacheDir := preset.GetCacheDir()
 
 	err := os.MkdirAll(cacheDir, os.ModePerm)
@@ -34,12 +34,12 @@ func EnsureCacheDir(preset govendor.Preset) error {
 	return nil
 }
 
-func ResetCacheDir(preset govendor.Preset) error {
+func resetCacheDir(preset govendor.Preset) error {
 	err := os.RemoveAll(preset.GetCacheDir())
 	if err != nil {
 		return fmt.Errorf("cannot remove cache: %w", err)
 	}
-	return EnsureCacheDir(preset)
+	return ensureCacheDir(preset)
 }
 
 func getRepositoryPath(cacheDir string, dep *govendor.Dependency) string {

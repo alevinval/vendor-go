@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/alevinval/vendor-go/internal"
 	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/alevinval/vendor-go/pkg/log"
 	"go.uber.org/zap/zapcore"
@@ -26,7 +27,7 @@ func newRootCmd(commandName string) *cobra.Command {
 	}
 }
 
-func newInitCmd(co *CmdOrchestrator) *cobra.Command {
+func newInitCmd(co *internal.CmdOrchestrator) *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
 		Short: "initialises the current directory",
@@ -39,7 +40,7 @@ func newInitCmd(co *CmdOrchestrator) *cobra.Command {
 	}
 }
 
-func newAddCmd(co *CmdOrchestrator) *cobra.Command {
+func newAddCmd(co *internal.CmdOrchestrator) *cobra.Command {
 	return &cobra.Command{
 		Use:   "add [url] [branch]",
 		Short: "Add a new dependency to the spec",
@@ -55,7 +56,7 @@ func newAddCmd(co *CmdOrchestrator) *cobra.Command {
 	}
 }
 
-func newInstallCmd(co *CmdOrchestrator) *cobra.Command {
+func newInstallCmd(co *internal.CmdOrchestrator) *cobra.Command {
 	return &cobra.Command{
 		Use:   "install",
 		Short: "Installs dependencies respectring the lockfile",
@@ -68,7 +69,7 @@ func newInstallCmd(co *CmdOrchestrator) *cobra.Command {
 	}
 }
 
-func newUpdateCmd(co *CmdOrchestrator) *cobra.Command {
+func newUpdateCmd(co *internal.CmdOrchestrator) *cobra.Command {
 	return &cobra.Command{
 		Use:   "update",
 		Short: "update dependencies to the latest commit from the branch of the spec",
@@ -81,7 +82,7 @@ func newUpdateCmd(co *CmdOrchestrator) *cobra.Command {
 	}
 }
 
-func newCleanCacheCmd(co *CmdOrchestrator) *cobra.Command {
+func newCleanCacheCmd(co *internal.CmdOrchestrator) *cobra.Command {
 	return &cobra.Command{
 		Use:   "cleancache",
 		Short: "resets the repository cache",
@@ -98,7 +99,7 @@ func NewVendorCmd(commandName string, preset govendor.Preset) *cobra.Command {
 	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
 
-	orchestrator := NewOrchestrator(preset)
+	orchestrator := internal.NewOrchestrator(preset)
 	rootCmd.AddCommand(newInitCmd(orchestrator))
 	rootCmd.AddCommand(newAddCmd(orchestrator))
 	rootCmd.AddCommand(newInstallCmd(orchestrator))

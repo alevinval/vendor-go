@@ -1,32 +1,31 @@
-package installers
+package internal
 
 import (
 	"fmt"
 	"io/fs"
 
-	"github.com/alevinval/vendor-go/internal"
-	"github.com/alevinval/vendor-go/internal/paths"
+	"github.com/alevinval/vendor-go/internal/importer"
 	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/fatih/color"
 )
 
 type dependencyInstaller struct {
-	dep           *govendor.Dependency
-	depLock       *govendor.DependencyLock
-	repo          *internal.Repository
-	importFilesFn fs.WalkDirFunc
+	dep             *govendor.Dependency
+	depLock         *govendor.DependencyLock
+	repo            *Repository
+	importWalkDirFn fs.WalkDirFunc
 }
 
-func newDependencyInstaller(spec *govendor.Spec, dep *govendor.Dependency, depLock *govendor.DependencyLock, repo *internal.Repository) *dependencyInstaller {
-	selector := paths.NewSelector(spec, dep)
-	importFilesFn := paths.ImportFileFunc(selector, repo.Path(), spec.VendorDir)
+func newDependencyInstaller(spec *govendor.Spec, dep *govendor.Dependency, depLock *govendor.DependencyLock, repo *Repository) *dependencyInstaller {
+	selector := importer.NewSelector(spec, dep)
+	importWalkDirFn := importer.WalkDirFunc(selector, repo.Path(), spec.VendorDir)
 
 	return &dependencyInstaller{
-		dep:           dep,
-		depLock:       depLock,
-		repo:          repo,
-		importFilesFn: importFilesFn,
+		dep:             dep,
+		depLock:         depLock,
+		repo:            repo,
+		importWalkDirFn: importWalkDirFn,
 	}
 }
 
@@ -95,7 +94,7 @@ func (d *dependencyInstaller) Update() (*govendor.DependencyLock, error) {
 }
 
 func (d *dependencyInstaller) importFiles() (*govendor.DependencyLock, error) {
-	err := d.repo.WalkDir(d.importFilesFn)
+	err := d.repo.WalkDir(d.importWalkDirFn)
 	if err != nil {
 		return nil, fmt.Errorf("cannot import files: %w", err)
 	}
