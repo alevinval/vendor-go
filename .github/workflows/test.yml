@@ -5,7 +5,7 @@ on:
       - main
 jobs:
   test:
-    name: go${{ matrix.go }}-${{ matrix.os }}
+    name: go-${{ matrix.go-version }}-${{ matrix.os }}
     strategy:
       matrix:
         go-version:
