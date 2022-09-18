@@ -1,10 +1,9 @@
-package installers
+package internal
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/alevinval/vendor-go/internal"
 	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/fatih/color"
@@ -36,7 +35,7 @@ func (in *Installer) run(action actionFunc) error {
 	resetVendorDir(in.spec.VendorDir)
 
 	for _, dep := range in.spec.Deps {
-		repo := internal.NewRepository(in.cacheDir, dep)
+		repo := NewRepository(in.cacheDir, dep)
 		lock, _ := in.lock.Find(dep.URL)
 		dependencyInstaller := newDependencyInstaller(in.spec, dep, lock, repo)
 
