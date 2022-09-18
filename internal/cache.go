@@ -34,6 +34,14 @@ func EnsureCacheDir(preset govendor.Preset) error {
 	return nil
 }
 
+func ResetCacheDir(preset govendor.Preset) error {
+	err := os.RemoveAll(preset.GetCacheDir())
+	if err != nil {
+		return fmt.Errorf("cannot remove cache: %w", err)
+	}
+	return EnsureCacheDir(preset)
+}
+
 func getRepositoryPath(cacheDir string, dep *govendor.Dependency) string {
 	return path.Join(cacheDir, REPOS_DIR, dep.ID())
 }

@@ -138,6 +138,14 @@ func (co *CmdOrchestrator) AddDependency(url, branch string) error {
 	return nil
 }
 
+func (co *CmdOrchestrator) CleanCache() error {
+	err := internal.ResetCacheDir(co.preset)
+	if err != nil {
+		return fmt.Errorf("cannot clean cache: %w", err)
+	}
+	return nil
+}
+
 func (co *CmdOrchestrator) getCacheLock() (*internal.Lock, error) {
 	err := internal.EnsureCacheDir(co.preset)
 	if err != nil {
