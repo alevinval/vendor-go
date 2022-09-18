@@ -41,7 +41,7 @@ func NewSpecLock(preset Preset) *SpecLock {
 	}
 }
 
-func (s *SpecLock) Add(lock *DependencyLock) {
+func (s *SpecLock) AddDependencyLock(lock *DependencyLock) {
 	existing, ok := s.Find(lock.URL)
 	if ok {
 		existing.Commit = lock.Commit

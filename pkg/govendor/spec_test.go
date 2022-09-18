@@ -40,8 +40,8 @@ func (tp *TestPreset) ForceFilters() bool {
 	return tp.force
 }
 
-func (tp *TestPreset) GetCachePath() string {
-	return ".test-cache-path"
+func (tp *TestPreset) GetCacheDir() string {
+	return ".test-cache-dir"
 }
 
 func (tp *TestPreset) GetFiltersForDependency(dep *Dependency) *Filters {

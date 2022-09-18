@@ -19,7 +19,7 @@ type dependencyInstaller struct {
 }
 
 func newDependencyInstaller(spec *govendor.Spec, dep *govendor.Dependency, depLock *govendor.DependencyLock, repo *internal.Repository) *dependencyInstaller {
-	selector := paths.NewPathSelector(spec, dep)
+	selector := paths.NewSelector(spec, dep)
 	importFilesFn := paths.ImportFileFunc(selector, repo.Path(), spec.VendorDir)
 
 	return &dependencyInstaller{
@@ -53,7 +53,7 @@ func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("git reset failed: %w", err)
+		return nil, fmt.Errorf("reset failed: %w", err)
 	}
 	return d.importFiles()
 }

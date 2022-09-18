@@ -11,7 +11,7 @@ import (
 	"github.com/alevinval/vendor-go/pkg/log"
 )
 
-func ImportFileFunc(selector *PathSelector, srcRoot, dstRoot string) fs.WalkDirFunc {
+func ImportFileFunc(selector *Selector, srcRoot, dstRoot string) fs.WalkDirFunc {
 	return func(path string, _ os.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("import interrupted: %w", err)

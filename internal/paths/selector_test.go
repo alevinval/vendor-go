@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPathSelector(t *testing.T) {
+func TestSelector(t *testing.T) {
 	spec := govendor.NewSpec(nil)
 	spec.Filters = govendor.NewFilters().
 		AddExtension("spec-extension").
@@ -20,27 +20,27 @@ func TestPathSelector(t *testing.T) {
 		AddTarget("dep-target").
 		AddIgnore("dep-ignore")
 
-	sut := NewPathSelector(spec, dep)
+	sut := NewSelector(spec, dep)
 	assert.Equal(t, spec.Filters.Clone().ApplyFilters(dep.Filters), sut.filters)
 }
 
-func TestPathSelectorSelect(t *testing.T) {
+func TestSelectorSelect(t *testing.T) {
 	filtersWithTargets := govendor.NewFilters().
 		AddExtension("proto").
 		AddTarget("target/a").
 		AddIgnore("ignored/a", "target/a/ignored")
-	sutWithTargets := PathSelector{
+	sutWithTargets := Selector{
 		filters: filtersWithTargets,
 	}
 
 	filtersWithoutTargets := govendor.NewFilters().
 		AddExtension("proto").
 		AddIgnore("ignored/a", "target/a/ignored")
-	sutWithoutTargets := PathSelector{
+	sutWithoutTargets := Selector{
 		filters: filtersWithoutTargets,
 	}
 
-	for _, sut := range []PathSelector{sutWithTargets, sutWithoutTargets} {
+	for _, sut := range []Selector{sutWithTargets, sutWithoutTargets} {
 		assert.True(t, sut.Select("target/a/some-file.proto"))
 		assert.False(t, sut.Select("target/a/ignored/ignored.proto"))
 		assert.False(t, sut.Select("ignored/a/ignored.proto"))

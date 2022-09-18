@@ -35,8 +35,8 @@ type Preset interface {
 	// the spec or dependency filters to the preset ones
 	ForceFilters() bool
 
-	// GetCachePath returns the path where the repository cache will be kept
-	GetCachePath() string
+	// GetCacheDir returns the path where the repository cache will be kept
+	GetCacheDir() string
 }
 
 // DefaultPreset provides the default configuration for the vendor library.
@@ -70,7 +70,7 @@ func (dp *DefaultPreset) ForceFilters() bool {
 	return false
 }
 
-func (dp *DefaultPreset) GetCachePath() string {
+func (dp *DefaultPreset) GetCacheDir() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		log.S().Warnf("Cannot find user HOME dir, using tempdir instead")
