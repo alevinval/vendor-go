@@ -36,11 +36,6 @@ func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
 		return nil, fmt.Errorf("cannot ensure repository: %w", err)
 	}
 
-	err = d.repo.Fetch()
-	if err != nil {
-		return nil, err
-	}
-
 	if d.depLock == nil {
 		log.S().Infof("installing %s@%s",
 			color.CyanString(d.dep.URL),
