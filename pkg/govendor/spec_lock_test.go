@@ -11,7 +11,7 @@ func TestSpecLockAdd(t *testing.T) {
 	assert.Empty(t, sut.Deps)
 
 	lock := NewDependencyLock("some-url", "some-commit")
-	sut.Add(lock)
+	sut.AddDependencyLock(lock)
 
 	assert.Equal(t, []*DependencyLock{lock}, sut.Deps)
 }
@@ -24,7 +24,7 @@ func TestSpecLockAddUpdates(t *testing.T) {
 	assert.Equal(t, "some-commit", sut.Deps[0].Commit)
 
 	other := NewDependencyLock("some-url", "other-commit")
-	sut.Add(other)
+	sut.AddDependencyLock(other)
 
 	assert.Equal(t, "other-commit", sut.Deps[0].Commit)
 }

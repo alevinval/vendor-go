@@ -13,9 +13,9 @@ type Repository struct {
 	path string
 }
 
-func NewRepository(cache string, dep *govendor.Dependency) *Repository {
+func NewRepository(cacheDir string, dep *govendor.Dependency) *Repository {
 	return &Repository{
-		path: filepath.Join(cache, dep.ID()),
+		path: filepath.Join(cacheDir, dep.ID()),
 		dep:  dep,
 		git:  &Git{},
 	}

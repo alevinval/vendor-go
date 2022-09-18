@@ -7,22 +7,22 @@ import (
 	"github.com/alevinval/vendor-go/pkg/govendor"
 )
 
-type PathSelector struct {
+type Selector struct {
 	filters *govendor.Filters
 }
 
-func NewPathSelector(spec *govendor.Spec, dep *govendor.Dependency) *PathSelector {
+func NewSelector(spec *govendor.Spec, dep *govendor.Dependency) *Selector {
 	filters := spec.Filters.Clone().ApplyFilters(dep.Filters)
-	return &PathSelector{
+	return &Selector{
 		filters,
 	}
 }
 
-func (sel *PathSelector) Select(path string) bool {
+func (sel *Selector) Select(path string) bool {
 	return sel.isTarget(path) && sel.hasExt(path) && !sel.isIgnored(path)
 }
 
-func (sel *PathSelector) isTarget(path string) bool {
+func (sel *Selector) isTarget(path string) bool {
 	if len(sel.filters.Targets) == 0 {
 		return true
 	}
@@ -35,7 +35,7 @@ func (sel *PathSelector) isTarget(path string) bool {
 	return false
 }
 
-func (sel *PathSelector) hasExt(path string) bool {
+func (sel *Selector) hasExt(path string) bool {
 	ext := filepath.Ext(path)
 	if ext == "" {
 		return false
@@ -50,7 +50,7 @@ func (sel *PathSelector) hasExt(path string) bool {
 	return false
 }
 
-func (sel *PathSelector) isIgnored(path string) bool {
+func (sel *Selector) isIgnored(path string) bool {
 	for _, prefix := range sel.filters.Ignores {
 		if hasPrefix(path, prefix) {
 			return true

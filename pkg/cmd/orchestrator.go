@@ -46,10 +46,10 @@ func (co *CmdOrchestrator) Install() error {
 		return fmt.Errorf("cannot install: %w", err)
 	}
 
-	cache := co.preset.GetCachePath()
-	log.S().Infof("repository cache located at %s", cache)
+	cacheDir := co.preset.GetCacheDir()
+	log.S().Infof("repository cache located at %s", cacheDir)
 
-	m := installers.NewInstaller(co.preset, spec, specLock)
+	m := installers.NewInstaller(cacheDir, spec, specLock)
 	err = m.Install()
 	if err != nil {
 		return fmt.Errorf("install failed: %w", err)
@@ -80,10 +80,10 @@ func (co *CmdOrchestrator) Update() error {
 		return fmt.Errorf("cannot update: %w", err)
 	}
 
-	cache := co.preset.GetCachePath()
-	log.S().Infof("repository cache located at %s", cache)
+	cacheDir := co.preset.GetCacheDir()
+	log.S().Infof("repository cache located at %s", cacheDir)
 
-	m := installers.NewInstaller(co.preset, spec, specLock)
+	m := installers.NewInstaller(cacheDir, spec, specLock)
 	err = m.Update()
 	if err != nil {
 		return fmt.Errorf("update failed: %w", err)

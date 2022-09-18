@@ -11,16 +11,16 @@ import (
 )
 
 type Installer struct {
-	spec      *govendor.Spec
-	lock      *govendor.SpecLock
-	cacheRoot string
+	spec     *govendor.Spec
+	lock     *govendor.SpecLock
+	cacheDir string
 }
 
-func NewInstaller(preset govendor.Preset, spec *govendor.Spec, lock *govendor.SpecLock) *Installer {
+func NewInstaller(cacheDir string, spec *govendor.Spec, lock *govendor.SpecLock) *Installer {
 	return &Installer{
-		cacheRoot: preset.GetCachePath(),
-		spec:      spec,
-		lock:      lock,
+		cacheDir: cacheDir,
+		spec:     spec,
+		lock:     lock,
 	}
 }
 
@@ -33,28 +33,28 @@ func (in *Installer) Update() error {
 }
 
 func (in *Installer) run(action actionFunc) error {
-	resetVendorPath(in.spec.VendorDir)
+	resetVendorDir(in.spec.VendorDir)
 
 	for _, dep := range in.spec.Deps {
-		repo := internal.NewRepository(in.cacheRoot, dep)
+		repo := internal.NewRepository(in.cacheDir, dep)
 		lock, _ := in.lock.Find(dep.URL)
-		depInstaller := newDependencyInstaller(in.spec, dep, lock, repo)
+		dependencyInstaller := newDependencyInstaller(in.spec, dep, lock, repo)
 
-		newLock, err := action(depInstaller)
+		dependencyLock, err := action(dependencyInstaller)
 		if err != nil {
 			return fmt.Errorf("cannot complete action: %w", err)
 		}
 
-		log.S().Infof("  🔒 %s", color.YellowString(newLock.Commit))
-		in.lock.Add(newLock)
+		log.S().Infof("  🔒 %s", color.YellowString(dependencyLock.Commit))
+		in.lock.AddDependencyLock(dependencyLock)
 	}
 
 	return nil
 }
 
-func resetVendorPath(vendorPath string) {
-	os.RemoveAll(vendorPath)
-	os.MkdirAll(vendorPath, os.ModePerm)
+func resetVendorDir(vendorDir string) {
+	os.RemoveAll(vendorDir)
+	os.MkdirAll(vendorDir, os.ModePerm)
 }
 
 type actionFunc = func(*dependencyInstaller) (*govendor.DependencyLock, error)

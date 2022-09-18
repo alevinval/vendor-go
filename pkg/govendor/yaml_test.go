@@ -47,7 +47,7 @@ deps:
 func TestSpecLockYamlSerialization(t *testing.T) {
 	dep := NewDependencyLock("some-url", "some-commit")
 	spec := NewSpecLock(&TestPreset{})
-	spec.Add(dep)
+	spec.AddDependencyLock(dep)
 
 	data, err := toYaml(spec)
 	assert.NoError(t, err)
