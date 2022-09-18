@@ -3,9 +3,9 @@ package internal
 import (
 	"fmt"
 
+	"github.com/alevinval/vendor-go/pkg/log"
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"go.uber.org/zap"
 )
 
 type Git struct{}
@@ -39,7 +39,7 @@ func (g Git) OpenOrClone(url, branch, path string) error {
 }
 
 func (g Git) Clone(url, branch, path string) error {
-	zap.S().Infof("cloning %s...", url)
+	log.S().Infof("cloning %s...", url)
 	cloneOpts := &git.CloneOptions{
 		URL:           url,
 		ReferenceName: plumbing.NewBranchReferenceName(branch),
