@@ -10,14 +10,16 @@ import (
 type Repository struct {
 	dep  *govendor.Dependency
 	git  *Git
+	lock *Lock
 	path string
 }
 
 func NewRepository(cacheDir string, dep *govendor.Dependency) *Repository {
 	return &Repository{
-		path: filepath.Join(cacheDir, dep.ID()),
 		dep:  dep,
 		git:  &Git{},
+		path: getRepositoryPath(cacheDir, dep),
+		lock: NewLock(getRepositoryLockPath(cacheDir, dep)),
 	}
 }
 
@@ -43,4 +45,12 @@ func (r *Repository) GetCurrentCommit() (string, error) {
 
 func (r *Repository) WalkDir(fn fs.WalkDirFunc) error {
 	return filepath.WalkDir(r.path, fn)
+}
+
+func (r *Repository) Acquire() error {
+	return r.lock.Acquire()
+}
+
+func (r *Repository) Release() error {
+	return r.lock.Release()
 }

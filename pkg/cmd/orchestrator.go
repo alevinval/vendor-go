@@ -139,10 +139,15 @@ func (co *CmdOrchestrator) AddDependency(url, branch string) error {
 }
 
 func (co *CmdOrchestrator) getCacheLock() (*internal.Lock, error) {
+	err := internal.EnsureCacheDir(co.preset)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create cache: %w", err)
+	}
+
 	lockPath := path.Join(co.preset.GetCacheDir(), "LOCK")
 	lock := internal.NewLock(lockPath).
 		WithWarn("cannot acquire cache lock, are you running multiple instances in parallel?")
-	err := lock.Acquire()
+	err = lock.Acquire()
 	if err != nil {
 		return nil, fmt.Errorf("cannot acquire cache lock %q: %w", lockPath, err)
 	}
