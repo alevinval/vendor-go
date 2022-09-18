@@ -3,19 +3,19 @@ package importer
 import (
 	"testing"
 
-	"github.com/alevinval/vendor-go/pkg/govendor"
+	"github.com/alevinval/vendor-go/pkg/vendor"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSelector(t *testing.T) {
-	spec := govendor.NewSpec(nil)
-	spec.Filters = govendor.NewFilters().
+	spec := vendor.NewSpec(nil)
+	spec.Filters = vendor.NewFilters().
 		AddExtension("spec-extension").
 		AddTarget("spec-target").
 		AddIgnore("spec-ignore")
 
-	dep := govendor.NewDependency("some-url", "some-branch")
-	dep.Filters = govendor.NewFilters().
+	dep := vendor.NewDependency("some-url", "some-branch")
+	dep.Filters = vendor.NewFilters().
 		AddExtension("dep-extension").
 		AddTarget("dep-target").
 		AddIgnore("dep-ignore")
@@ -25,7 +25,7 @@ func TestSelector(t *testing.T) {
 }
 
 func TestSelectorSelect(t *testing.T) {
-	filtersWithTargets := govendor.NewFilters().
+	filtersWithTargets := vendor.NewFilters().
 		AddExtension("proto").
 		AddTarget("target/a").
 		AddIgnore("ignored/a", "target/a/ignored")
@@ -33,7 +33,7 @@ func TestSelectorSelect(t *testing.T) {
 		filters: filtersWithTargets,
 	}
 
-	filtersWithoutTargets := govendor.NewFilters().
+	filtersWithoutTargets := vendor.NewFilters().
 		AddExtension("proto").
 		AddIgnore("ignored/a", "target/a/ignored")
 	sutWithoutTargets := Selector{

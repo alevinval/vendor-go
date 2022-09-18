@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/alevinval/vendor-go/internal"
-	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/alevinval/vendor-go/pkg/log"
+	"github.com/alevinval/vendor-go/pkg/vendor"
 	"go.uber.org/zap/zapcore"
 
 	"github.com/spf13/cobra"
@@ -18,7 +18,7 @@ var (
 func newRootCmd(commandName string) *cobra.Command {
 	return &cobra.Command{
 		Use:   commandName,
-		Short: fmt.Sprintf("[%s] %s is a flexible and customizable vendoring tool", govendor.VERSION, commandName),
+		Short: fmt.Sprintf("[%s] %s is a flexible and customizable vendoring tool", vendor.VERSION, commandName),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if isDebugEnabled {
 				log.Level.SetLevel(zapcore.DebugLevel)
@@ -95,7 +95,7 @@ func newCleanCacheCmd(co *internal.CmdOrchestrator) *cobra.Command {
 	}
 }
 
-func NewVendorCmd(commandName string, preset govendor.Preset) *cobra.Command {
+func NewVendorCmd(commandName string, preset vendor.Preset) *cobra.Command {
 	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
 

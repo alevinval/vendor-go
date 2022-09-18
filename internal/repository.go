@@ -4,17 +4,17 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"github.com/alevinval/vendor-go/pkg/govendor"
+	"github.com/alevinval/vendor-go/pkg/vendor"
 )
 
 type Repository struct {
-	dep  *govendor.Dependency
+	dep  *vendor.Dependency
 	git  *Git
 	lock *Lock
 	path string
 }
 
-func NewRepository(cacheDir string, dep *govendor.Dependency) *Repository {
+func NewRepository(cacheDir string, dep *vendor.Dependency) *Repository {
 	return &Repository{
 		dep:  dep,
 		git:  &Git{},

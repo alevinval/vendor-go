@@ -5,19 +5,19 @@ import (
 	"io/fs"
 
 	"github.com/alevinval/vendor-go/internal/importer"
-	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/alevinval/vendor-go/pkg/log"
+	"github.com/alevinval/vendor-go/pkg/vendor"
 	"github.com/fatih/color"
 )
 
 type dependencyInstaller struct {
-	dep             *govendor.Dependency
-	depLock         *govendor.DependencyLock
+	dep             *vendor.Dependency
+	depLock         *vendor.DependencyLock
 	repo            *Repository
 	importWalkDirFn fs.WalkDirFunc
 }
 
-func newDependencyInstaller(spec *govendor.Spec, dep *govendor.Dependency, depLock *govendor.DependencyLock, repo *Repository) *dependencyInstaller {
+func newDependencyInstaller(spec *vendor.Spec, dep *vendor.Dependency, depLock *vendor.DependencyLock, repo *Repository) *dependencyInstaller {
 	selector := importer.NewSelector(spec, dep)
 	importWalkDirFn := importer.WalkDirFunc(selector, repo.Path(), spec.VendorDir)
 
@@ -29,7 +29,7 @@ func newDependencyInstaller(spec *govendor.Spec, dep *govendor.Dependency, depLo
 	}
 }
 
-func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
+func (d *dependencyInstaller) Install() (*vendor.DependencyLock, error) {
 	err := d.repo.Acquire()
 	if err != nil {
 		return nil, fmt.Errorf("cannot acquire repository lock: %w", err)
@@ -63,7 +63,7 @@ func (d *dependencyInstaller) Install() (*govendor.DependencyLock, error) {
 	return d.importFiles()
 }
 
-func (d *dependencyInstaller) Update() (*govendor.DependencyLock, error) {
+func (d *dependencyInstaller) Update() (*vendor.DependencyLock, error) {
 	err := d.repo.Acquire()
 	if err != nil {
 		return nil, fmt.Errorf("cannot acquire repository lock: %w", err)
@@ -93,7 +93,7 @@ func (d *dependencyInstaller) Update() (*govendor.DependencyLock, error) {
 	return d.importFiles()
 }
 
-func (d *dependencyInstaller) importFiles() (*govendor.DependencyLock, error) {
+func (d *dependencyInstaller) importFiles() (*vendor.DependencyLock, error) {
 	err := d.repo.WalkDir(d.importWalkDirFn)
 	if err != nil {
 		return nil, fmt.Errorf("cannot import files: %w", err)
@@ -104,5 +104,5 @@ func (d *dependencyInstaller) importFiles() (*govendor.DependencyLock, error) {
 		return nil, fmt.Errorf("cannot get current commit: %w", err)
 	}
 
-	return govendor.NewDependencyLock(d.dep.URL, commit), nil
+	return vendor.NewDependencyLock(d.dep.URL, commit), nil
 }

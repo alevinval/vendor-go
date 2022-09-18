@@ -1,4 +1,4 @@
-package govendor
+package vendor
 
 import (
 	"os"
