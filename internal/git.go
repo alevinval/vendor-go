@@ -79,7 +79,21 @@ func (g Git) Reset(path, refname string) error {
 		return gitOpenErr(err)
 	}
 
-	hash, err := repo.ResolveRevision(plumbing.Revision(refname))
+	revisions := []plumbing.Revision{
+		plumbing.Revision(
+			plumbing.NewRemoteReferenceName("origin", refname),
+		),
+		plumbing.Revision(refname),
+	}
+
+	var hash *plumbing.Hash
+	for _, rev := range revisions {
+		hash, err = repo.ResolveRevision(rev)
+		if err == nil {
+			break
+		}
+	}
+
 	if err != nil {
 		return fmt.Errorf("cannot resolve %q: %w", refname, err)
 	}
