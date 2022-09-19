@@ -1,4 +1,4 @@
-version: 0.3.4
+version: v0.3.5
 preset: default
 vendor_dir: vendor/
 extensions:

@@ -10,7 +10,7 @@ import (
 )
 
 // VERSION of the current tool
-const VERSION = "0.3.4"
+const VERSION = "v0.3.5"
 
 // Spec holds relevant information related to the specification of what
 // versions need to be fetched when updating dependencies.
@@ -86,6 +86,10 @@ func (s *Spec) applyPreset(preset Preset) {
 	s.preset = preset
 	s.VendorDir = preset.GetVendorDir()
 	s.PresetName = preset.GetPresetName()
+
+	if s.Version < VERSION {
+		s.Version = VERSION
+	}
 
 	if preset.ForceFilters() {
 		s.Filters = preset.GetFilters()

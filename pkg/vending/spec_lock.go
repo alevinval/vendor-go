@@ -28,13 +28,13 @@ func LoadSpecLock(preset Preset) (*SpecLock, error) {
 		return NewSpecLock(preset), nil
 	}
 
-	spec := NewSpecLock(preset)
-	err = yaml.Unmarshal(data, spec)
+	specLock := NewSpecLock(preset)
+	err = yaml.Unmarshal(data, specLock)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read: %w", err)
 	}
 
-	return spec, nil
+	return specLock, nil
 }
 
 // NewSpecLock allocates a new SpecLock instance with a default initialization.
@@ -70,6 +70,8 @@ func (s *SpecLock) FindByURL(url string) (*DependencyLock, bool) {
 // Save converts the SpecLock to YAML, and writes the data in the spec lock
 // file, as specified by the Preset.
 func (s *SpecLock) Save() error {
+	s.applyPreset()
+
 	filename := s.preset.GetSpecLockFilename()
 	data, err := toYaml(s)
 	if err != nil {
@@ -82,4 +84,10 @@ func (s *SpecLock) Save() error {
 	}
 
 	return nil
+}
+
+func (s *SpecLock) applyPreset() {
+	if s.Version < VERSION {
+		s.Version = VERSION
+	}
 }
