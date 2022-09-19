@@ -5,16 +5,16 @@ import (
 	"os"
 	"path"
 
-	"github.com/alevinval/vendor-go/pkg/govendor"
 	"github.com/alevinval/vendor-go/pkg/log"
+	"github.com/alevinval/vendor-go/pkg/vendoring"
 	"github.com/fatih/color"
 )
 
 type CmdOrchestrator struct {
-	preset govendor.Preset
+	preset vendoring.Preset
 }
 
-func NewOrchestrator(preset govendor.Preset) *CmdOrchestrator {
+func NewOrchestrator(preset vendoring.Preset) *CmdOrchestrator {
 	return &CmdOrchestrator{preset}
 }
 
@@ -24,7 +24,7 @@ func (co *CmdOrchestrator) Init() error {
 		return fmt.Errorf("%q already exists? %w", co.preset.GetSpecFilename(), err)
 	}
 
-	spec := govendor.NewSpec(co.preset)
+	spec := vendoring.NewSpec(co.preset)
 
 	err = spec.Save()
 	if err != nil {
@@ -42,12 +42,12 @@ func (co *CmdOrchestrator) Install() error {
 	}
 	defer lock.Release()
 
-	spec, err := govendor.LoadSpec(co.preset)
+	spec, err := vendoring.LoadSpec(co.preset)
 	if err != nil {
 		return fmt.Errorf("cannot install: %w", err)
 	}
 
-	specLock, err := govendor.LoadSpecLock(co.preset)
+	specLock, err := vendoring.LoadSpecLock(co.preset)
 	if err != nil {
 		return fmt.Errorf("cannot install: %w", err)
 	}
@@ -82,12 +82,12 @@ func (co *CmdOrchestrator) Update() error {
 	}
 	defer lock.Release()
 
-	spec, err := govendor.LoadSpec(co.preset)
+	spec, err := vendoring.LoadSpec(co.preset)
 	if err != nil {
 		return fmt.Errorf("cannot update: %w", err)
 	}
 
-	specLock, err := govendor.LoadSpecLock(co.preset)
+	specLock, err := vendoring.LoadSpecLock(co.preset)
 	if err != nil {
 		return fmt.Errorf("cannot update: %w", err)
 	}
@@ -116,12 +116,12 @@ func (co *CmdOrchestrator) Update() error {
 }
 
 func (co *CmdOrchestrator) AddDependency(url, branch string) error {
-	spec, err := govendor.LoadSpec(co.preset)
+	spec, err := vendoring.LoadSpec(co.preset)
 	if err != nil {
 		return fmt.Errorf("cannot add dependency: %w", err)
 	}
 
-	dep := govendor.NewDependency(url, branch)
+	dep := vendoring.NewDependency(url, branch)
 	spec.AddDependency(dep)
 
 	err = spec.Save()

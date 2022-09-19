@@ -1,4 +1,4 @@
-package govendor
+package vendoring
 
 import (
 	"os"
@@ -76,5 +76,5 @@ func (dp *DefaultPreset) GetCacheDir() string {
 		log.S().Warnf("Cannot find user HOME dir, using tempdir instead")
 		return os.TempDir()
 	}
-	return path.Join(homeDir, ".go-vendor-cache")
+	return path.Join(homeDir, ".vendoring-cache")
 }
