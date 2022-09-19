@@ -30,7 +30,7 @@ func newRootCmd(commandName string) *cobra.Command {
 func newInitCmd(co *internal.CmdOrchestrator) *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
-		Short: "initialises the current directory",
+		Short: "initializes the current directory",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := co.Init()
 			if err != nil {
@@ -59,7 +59,7 @@ func newAddCmd(co *internal.CmdOrchestrator) *cobra.Command {
 func newInstallCmd(co *internal.CmdOrchestrator) *cobra.Command {
 	return &cobra.Command{
 		Use:   "install",
-		Short: "Installs dependencies respectring the lockfile",
+		Short: "Installs dependencies respecting the lockfile",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := co.Install()
 			if err != nil {

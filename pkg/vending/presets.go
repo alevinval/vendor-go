@@ -9,7 +9,7 @@ import (
 
 var _ Preset = (*DefaultPreset)(nil)
 
-// Preset interface used to customize the behaviour of the vendor library.
+// Preset interface used to customize the behavior of the vendor library.
 // It allows customizing anything you need, like the names of the spec and
 // lock file, also allows customizing the targeted and ignored paths.
 type Preset interface {
