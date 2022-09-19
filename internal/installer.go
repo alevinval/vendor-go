@@ -78,7 +78,7 @@ func (in *Installer) runInParallel(action actionFunc) error {
 
 func (in *Installer) runInBackground(wg *sync.WaitGroup, action actionFunc, dep *vending.Dependency, out chan *vending.DependencyLock) error {
 	repo := NewRepository(in.cacheDir, dep)
-	lock, _ := in.lock.Find(dep.URL)
+	lock, _ := in.lock.FindByURL(dep.URL)
 	dependencyInstaller := newDependencyInstaller(in.spec, dep, lock, repo)
 
 	dependencyLock, err := action(dependencyInstaller)

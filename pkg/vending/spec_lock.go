@@ -49,7 +49,7 @@ func NewSpecLock(preset Preset) *SpecLock {
 
 // AddDependencyLock adds a DependencyLock to the list of locked dependencies.
 func (s *SpecLock) AddDependencyLock(lock *DependencyLock) {
-	existing, ok := s.Find(lock.URL)
+	existing, ok := s.FindByURL(lock.URL)
 	if ok {
 		existing.Commit = lock.Commit
 	} else {
@@ -57,8 +57,8 @@ func (s *SpecLock) AddDependencyLock(lock *DependencyLock) {
 	}
 }
 
-// Find finds a DependencyLock by URL.
-func (s *SpecLock) Find(url string) (*DependencyLock, bool) {
+// FindByURL finds a DependencyLock by URL.
+func (s *SpecLock) FindByURL(url string) (*DependencyLock, bool) {
 	for _, dep := range s.Deps {
 		if strings.EqualFold(dep.URL, url) {
 			return dep, true
