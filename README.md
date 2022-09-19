@@ -3,13 +3,24 @@
 This tool allows users to install, manage and update dependencies. See the
 [example](example/) to see how it works.
 
+## Features
+
+* Local caching of repositories: speeds up the installation and update commands
+  since a full clone is not required every time.
+
+* Highly customizable tool: develop your custom presets, adapt, and standardize the
+  vendoring process to your needs.
+
+* Parallelized vendoring process
+
 ## Usage
-1. `vending init` initialises a `.vendor.yml` file in the working directory
-3. `vending add` adds a dependency in the `.vendor.yml` file
-5. `vending install` downloads and vending the vendor the specified dependencies
-   1. The first time this command is executed, it will generate a `.vendor-lock.yml`
-      which keeps track of the locked reference that has been vendored (eg. a specific commit)
-   2. If the lock file is already present, it will vendor the depencies locked to
-      whatever reference the dependency is locked at
-6. `vending update` ignores the `vendor-lock.yml` and fetches newest dependencies
+
+* `vending init` initializes a `.vendor.yml` file in the working directory
+* `vending add` adds a dependency in the `.vendor.yml` file
+* `vending install` downloads and vendors the vendor the specified dependencies
+   * The first time this command is executed, it will generate a `.vendor-lock.yml`
+     which keeps track of the locked reference that has been vendored (eg. a specific commit)
+   * Once the lock file already exists, it vendors dependencies at the
+     specified locked reference.
+* `vending update` ignores the `vendor-lock.yml` and fetches newest dependencies
    according to the refname that is specified in the `.vendor.yml` file
