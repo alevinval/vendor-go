@@ -18,7 +18,7 @@ func TestSpecYamlSerialization(t *testing.T) {
 	data, err := toYaml(spec)
 	assert.NoError(t, err)
 
-	expected := `version: 0.3.4
+	expected := `version: v0.3.5
 preset: test-preset
 vendor_dir: test-vendor-dir
 extensions:
@@ -52,7 +52,7 @@ func TestSpecLockYamlSerialization(t *testing.T) {
 	data, err := toYaml(spec)
 	assert.NoError(t, err)
 
-	expected := `version: 0.3.4
+	expected := `version: v0.3.5
 deps:
   - url: some-url
     commit: some-commit

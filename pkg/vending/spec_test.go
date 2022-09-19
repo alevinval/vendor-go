@@ -128,3 +128,21 @@ func TestSpec_WhenForceFilters_OverridesFilters(t *testing.T) {
 	assert.Equal(t, preset.GetFilters(), sut.Filters)
 	assert.Equal(t, preset.GetFiltersForDependency(dep), sut.Deps[0].Filters)
 }
+
+func TestSpec_BumpsVersion_WhenSpecIsOlder(t *testing.T) {
+	spec := NewSpec(nil)
+	spec.Version = "v0.0.1"
+
+	spec.applyPreset(&TestPreset{})
+
+	assert.Equal(t, VERSION, spec.Version)
+}
+
+func TestSpec_DoesNotBumpVersion_WhenSpecIsNewer(t *testing.T) {
+	spec := NewSpec(nil)
+	spec.Version = "v999.0.0"
+
+	spec.applyPreset(&TestPreset{})
+
+	assert.Equal(t, "v999.0.0", spec.Version)
+}
