@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alevinval/vendor-go/pkg/vendoring"
+	"github.com/alevinval/vendor-go/pkg/vending"
 )
 
 type Selector struct {
-	filters *vendoring.Filters
+	filters *vending.Filters
 }
 
-func NewSelector(spec *vendoring.Spec, dep *vendoring.Dependency) *Selector {
+func NewSelector(spec *vending.Spec, dep *vending.Dependency) *Selector {
 	filters := spec.Filters.Clone().ApplyFilters(dep.Filters)
 	return &Selector{
 		filters,

@@ -1,4 +1,4 @@
-package vendoring
+package vending
 
 import (
 	"testing"
@@ -18,7 +18,7 @@ func TestSpecYamlSerialization(t *testing.T) {
 	data, err := toYaml(spec)
 	assert.NoError(t, err)
 
-	expected := `version: 0.3.2
+	expected := `version: 0.3.4
 preset: test-preset
 vendor_dir: test-vendor-dir
 extensions:
@@ -52,7 +52,7 @@ func TestSpecLockYamlSerialization(t *testing.T) {
 	data, err := toYaml(spec)
 	assert.NoError(t, err)
 
-	expected := `version: 0.3.2
+	expected := `version: 0.3.4
 deps:
   - url: some-url
     commit: some-commit

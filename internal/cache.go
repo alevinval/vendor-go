@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/alevinval/vendor-go/pkg/vendoring"
+	"github.com/alevinval/vendor-go/pkg/vending"
 )
 
 const (
@@ -13,7 +13,7 @@ const (
 	REPOS_DIR = "repos"
 )
 
-func ensureCacheDir(preset vendoring.Preset) error {
+func ensureCacheDir(preset vending.Preset) error {
 	cacheDir := preset.GetCacheDir()
 
 	err := os.MkdirAll(cacheDir, os.ModePerm)
@@ -34,7 +34,7 @@ func ensureCacheDir(preset vendoring.Preset) error {
 	return nil
 }
 
-func resetCacheDir(preset vendoring.Preset) error {
+func resetCacheDir(preset vending.Preset) error {
 	err := os.RemoveAll(preset.GetCacheDir())
 	if err != nil {
 		return fmt.Errorf("cannot remove cache: %w", err)
@@ -42,11 +42,11 @@ func resetCacheDir(preset vendoring.Preset) error {
 	return ensureCacheDir(preset)
 }
 
-func getRepositoryPath(cacheDir string, dep *vendoring.Dependency) string {
+func getRepositoryPath(cacheDir string, dep *vending.Dependency) string {
 	return path.Join(cacheDir, REPOS_DIR, dep.ID())
 }
 
-func getRepositoryLockPath(cacheDir string, dep *vendoring.Dependency) string {
+func getRepositoryLockPath(cacheDir string, dep *vending.Dependency) string {
 	return path.Join(cacheDir, LOCKS_DIR, dep.ID())
 }
 

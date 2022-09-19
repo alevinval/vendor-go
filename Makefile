@@ -1,16 +1,16 @@
 .PHONY: build
 build:
-	go build ./cmd/vendoring
+	go build ./cmd/vending
 
 .PHONY: install
 install:
-	go install ./cmd/vendoring
+	go install ./cmd/vending
 
 .PHONY: clean
 clean:
 	go clean ./...
 	rm -f coverage.out
-	rm -f vendoring
+	rm -f vending
 
 .PHONY: test
 test:

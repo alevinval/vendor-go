@@ -5,17 +5,17 @@ import (
 	"os"
 
 	"github.com/alevinval/vendor-go/pkg/log"
-	"github.com/alevinval/vendor-go/pkg/vendoring"
+	"github.com/alevinval/vendor-go/pkg/vending"
 	"github.com/fatih/color"
 )
 
 type Installer struct {
-	spec     *vendoring.Spec
-	lock     *vendoring.SpecLock
+	spec     *vending.Spec
+	lock     *vending.SpecLock
 	cacheDir string
 }
 
-func NewInstaller(cacheDir string, spec *vendoring.Spec, lock *vendoring.SpecLock) *Installer {
+func NewInstaller(cacheDir string, spec *vending.Spec, lock *vending.SpecLock) *Installer {
 	return &Installer{
 		cacheDir: cacheDir,
 		spec:     spec,
@@ -56,12 +56,12 @@ func resetVendorDir(vendorDir string) {
 	os.MkdirAll(vendorDir, os.ModePerm)
 }
 
-type actionFunc = func(*dependencyInstaller) (*vendoring.DependencyLock, error)
+type actionFunc = func(*dependencyInstaller) (*vending.DependencyLock, error)
 
-func installFunc(installer *dependencyInstaller) (*vendoring.DependencyLock, error) {
+func installFunc(installer *dependencyInstaller) (*vending.DependencyLock, error) {
 	return installer.Install()
 }
 
-func updateFunc(installer *dependencyInstaller) (*vendoring.DependencyLock, error) {
+func updateFunc(installer *dependencyInstaller) (*vending.DependencyLock, error) {
 	return installer.Update()
 }
