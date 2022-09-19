@@ -1,4 +1,4 @@
-package vendoring
+package vending
 
 import (
 	"testing"

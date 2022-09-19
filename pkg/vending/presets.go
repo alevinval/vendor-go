@@ -1,4 +1,4 @@
-package vendoring
+package vending
 
 import (
 	"os"
@@ -76,5 +76,5 @@ func (dp *DefaultPreset) GetCacheDir() string {
 		log.S().Warnf("Cannot find user HOME dir, using tempdir instead")
 		return os.TempDir()
 	}
-	return path.Join(homeDir, ".vendoring-cache")
+	return path.Join(homeDir, ".vending-cache")
 }
