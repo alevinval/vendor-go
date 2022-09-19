@@ -95,9 +95,9 @@ func newCleanCacheCmd(co *internal.CmdOrchestrator) *cobra.Command {
 	}
 }
 
-// NewVendorCmd returns a configured cobra command that serves as entry point
+// NewVendingCmd returns a configured cobra command that serves as entry point
 // to the vending CLI.
-func NewVendorCmd(commandName string, preset vending.Preset) *cobra.Command {
+func NewVendingCmd(commandName string, preset vending.Preset) *cobra.Command {
 	rootCmd := newRootCmd(commandName)
 	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
 

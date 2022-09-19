@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	cmd.NewVendorCmd("vending", &vending.DefaultPreset{}).Execute()
+	cmd.NewVendingCmd("vending", &vending.DefaultPreset{}).Execute()
 }
