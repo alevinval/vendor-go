@@ -9,8 +9,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// VERSION of the current tool
 const VERSION = "0.3.4"
 
+// Spec holds relevant information related to the specification of what
+// versions need to be fetched when updating dependencies.
+//
+// This model directly maps to the serialized YAML of the spec lock file.
 type Spec struct {
 	Version    string        `yaml:"version"`
 	PresetName string        `yaml:"preset"`
@@ -20,6 +25,7 @@ type Spec struct {
 	preset     Preset        `yaml:"-"`
 }
 
+// LoadSpec loads a Spec given a Preset.
 func LoadSpec(preset Preset) (*Spec, error) {
 	preset = checkPreset(preset, true)
 
@@ -39,6 +45,7 @@ func LoadSpec(preset Preset) (*Spec, error) {
 	return spec, nil
 }
 
+// NewSpec allocates a new Spec instance with the default initialization.
 func NewSpec(preset Preset) *Spec {
 	preset = checkPreset(preset, true)
 	spec := &Spec{
@@ -50,6 +57,7 @@ func NewSpec(preset Preset) *Spec {
 	return spec
 }
 
+// AddDependency adds a Dependency to the list of dependencies to vendor.
 func (s *Spec) AddDependency(dependency *Dependency) {
 	if dep, ok := s.findDep(dependency); ok {
 		dep.Update(dependency)
@@ -59,6 +67,8 @@ func (s *Spec) AddDependency(dependency *Dependency) {
 	s.applyPreset(s.preset)
 }
 
+// Save converts the Spec to YAML, and writes the data in the spec file,
+// as specified by the Preset.
 func (s *Spec) Save() error {
 	filename := s.preset.GetSpecFilename()
 	data, err := toYaml(s)

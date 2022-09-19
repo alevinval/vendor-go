@@ -70,6 +70,8 @@ func (dp *DefaultPreset) ForceFilters() bool {
 	return false
 }
 
+// GetCacheDir default implementation tries to return a path under the user
+// home dir. When this operation fails, it resorts back to a temporary dir..
 func (dp *DefaultPreset) GetCacheDir() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
