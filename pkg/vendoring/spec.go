@@ -1,4 +1,4 @@
-package govendor
+package vendoring
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const VERSION = "0.2.0"
+const VERSION = "0.3.2"
 
 type Spec struct {
 	Version    string        `yaml:"version"`
