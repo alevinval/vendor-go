@@ -23,10 +23,9 @@ var (
 
 func init() {
 	logger = zap.Must(getDefaultCfg().Build())
-	defer logger.Sync()
 }
 
-// S returns the zap suggared logger from the current logger instance.
+// S returns the zap sugared logger from the current logger instance.
 func S() *zap.SugaredLogger {
 	return logger.Sugar()
 }
