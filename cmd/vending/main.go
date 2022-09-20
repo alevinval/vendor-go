@@ -6,5 +6,8 @@ import (
 )
 
 func main() {
-	cmd.NewVendingCmd("vending", &vending.DefaultPreset{}).Execute()
+	cmd.NewCobraCommand(
+		cmd.WithCommandName("vending"),
+		cmd.WithPreset(&vending.DefaultPreset{}),
+	).Execute()
 }
