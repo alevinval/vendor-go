@@ -25,8 +25,3 @@ func TestDependencyUpdate(t *testing.T) {
 	assert.Equal(t, other.Filters.Targets, dep.Filters.Targets)
 	assert.Equal(t, other.Filters.Ignores, dep.Filters.Ignores)
 }
-
-func TestDependencyID(t *testing.T) {
-	dep := NewDependency("some-url", "some-branch")
-	assert.Equal(t, "736f6d652d75726ce3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", dep.ID())
-}
