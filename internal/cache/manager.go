@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/alevinval/vendor-go/internal/lock"
 	"github.com/alevinval/vendor-go/pkg/vending"
 )
 
@@ -66,6 +67,26 @@ func (man *Manager) GetRepositoryPath(dep *vending.Dependency) string {
 
 func (man *Manager) GetRepositoryLockPath(dep *vending.Dependency) string {
 	return path.Join(man.preset.GetCacheDir(), LOCKS_DIR, getDependencyID(dep))
+}
+
+func (man *Manager) LockCache() (*lock.Lock, error) {
+	err := man.Ensure()
+	if err != nil {
+		return nil, fmt.Errorf("cannot lock cache: %w", err)
+	}
+
+	lockPath := man.getCacheLockPath()
+	lock := lock.New(lockPath).
+		WithWarn("cannot acquire cache lock, are you running multiple instances in parallel?")
+	err = lock.Acquire()
+	if err != nil {
+		return nil, fmt.Errorf("cannot acquire cache lock %q: %w", lockPath, err)
+	}
+	return lock, nil
+}
+
+func (man *Manager) getCacheLockPath() string {
+	return path.Join(man.preset.GetCacheDir(), "LOCK")
 }
 
 func ensureCacheErr(err error) error {

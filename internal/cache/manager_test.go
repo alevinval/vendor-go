@@ -42,6 +42,20 @@ func TestManager_Ensure(t *testing.T) {
 	fsMock.AssertExpectations(t)
 }
 
+func TestManager_LockCache(t *testing.T) {
+	preset := &TestPreset{}
+	defer func() {
+		os.RemoveAll(preset.GetCacheDir())
+	}()
+
+	sut := NewManager(&TestPreset{})
+
+	lock, err := sut.LockCache()
+
+	assert.NoError(t, err)
+	assert.NotNil(t, lock)
+}
+
 func TestManager_GetRepositoryPath(t *testing.T) {
 	dep := vending.NewDependency("some-url", "some-branch")
 	sut := NewManager(&TestPreset{})
