@@ -5,13 +5,14 @@ import (
 	"path/filepath"
 
 	"github.com/alevinval/vendor-go/internal/cache"
+	"github.com/alevinval/vendor-go/internal/lock"
 	"github.com/alevinval/vendor-go/pkg/vending"
 )
 
 type Repository struct {
 	dep  *vending.Dependency
 	git  *Git
-	lock *Lock
+	lock *lock.Lock
 	path string
 }
 
@@ -20,7 +21,7 @@ func NewRepository(manager *cache.Manager, dep *vending.Dependency) *Repository 
 		dep:  dep,
 		git:  &Git{},
 		path: manager.GetRepositoryPath(dep),
-		lock: NewLock(manager.GetRepositoryLockPath(dep)),
+		lock: lock.New(manager.GetRepositoryLockPath(dep)),
 	}
 }
 

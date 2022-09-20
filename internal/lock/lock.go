@@ -1,4 +1,4 @@
-package internal
+package lock
 
 import (
 	"fmt"
@@ -9,14 +9,16 @@ import (
 )
 
 type Lock struct {
-	file *lockedfile.File
-	path string
-	warn string
+	file   *lockedfile.File
+	path   string
+	warn   string
+	period time.Duration
 }
 
-func NewLock(path string) *Lock {
+func New(path string) *Lock {
 	return &Lock{
-		path: path,
+		path:   path,
+		period: time.Duration(1 * time.Second),
 	}
 }
 
@@ -35,13 +37,18 @@ func (l *Lock) WithWarn(warn string) *Lock {
 	return l
 }
 
-func (p *Lock) doPoll(ch <-chan *lockedfile.File) (*lockedfile.File, error) {
-	warn := p.warn != ""
+func (l *Lock) WithPeriod(period time.Duration) *Lock {
+	l.period = period
+	return l
+}
+
+func (l *Lock) doPoll(ch <-chan *lockedfile.File) (*lockedfile.File, error) {
+	warn := l.warn != ""
 	for {
 		select {
-		case <-time.After(1 * time.Second):
+		case <-time.After(l.period):
 			if warn {
-				log.S().Warnf(p.warn)
+				log.S().Warnf(l.warn)
 				warn = false
 			}
 		case lock, ok := <-ch:

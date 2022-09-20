@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"os"
-	"path"
 
 	"github.com/alevinval/vendor-go/internal/cache"
 	"github.com/alevinval/vendor-go/pkg/log"
@@ -38,7 +37,7 @@ func (co *CmdOrchestrator) Init() error {
 }
 
 func (co *CmdOrchestrator) Install() error {
-	lock, err := co.getCacheLock()
+	lock, err := co.cacheManager.LockCache()
 	if err != nil {
 		return fmt.Errorf("cannot install: %w", err)
 	}
@@ -78,7 +77,7 @@ func (co *CmdOrchestrator) Install() error {
 }
 
 func (co *CmdOrchestrator) Update() error {
-	lock, err := co.getCacheLock()
+	lock, err := co.cacheManager.LockCache()
 	if err != nil {
 		return fmt.Errorf("cannot install: %w", err)
 	}
@@ -144,20 +143,4 @@ func (co *CmdOrchestrator) CleanCache() error {
 		return fmt.Errorf("cannot clean cache: %w", err)
 	}
 	return nil
-}
-
-func (co *CmdOrchestrator) getCacheLock() (*Lock, error) {
-	err := co.cacheManager.Ensure()
-	if err != nil {
-		return nil, fmt.Errorf("cannot create cache: %w", err)
-	}
-
-	lockPath := path.Join(co.preset.GetCacheDir(), "LOCK")
-	lock := NewLock(lockPath).
-		WithWarn("cannot acquire cache lock, are you running multiple instances in parallel?")
-	err = lock.Acquire()
-	if err != nil {
-		return nil, fmt.Errorf("cannot acquire cache lock %q: %w", lockPath, err)
-	}
-	return lock, nil
 }
