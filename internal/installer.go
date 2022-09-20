@@ -5,22 +5,23 @@ import (
 	"os"
 	"sync"
 
+	"github.com/alevinval/vendor-go/internal/cache"
 	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/alevinval/vendor-go/pkg/vending"
 	"github.com/fatih/color"
 )
 
 type Installer struct {
-	spec     *vending.Spec
-	lock     *vending.SpecLock
-	cacheDir string
+	spec         *vending.Spec
+	lock         *vending.SpecLock
+	cacheManager *cache.Manager
 }
 
-func NewInstaller(cacheDir string, spec *vending.Spec, lock *vending.SpecLock) *Installer {
+func NewInstaller(cacheManager *cache.Manager, spec *vending.Spec, lock *vending.SpecLock) *Installer {
 	return &Installer{
-		cacheDir: cacheDir,
-		spec:     spec,
-		lock:     lock,
+		spec,
+		lock,
+		cacheManager,
 	}
 }
 
@@ -77,7 +78,7 @@ func (in *Installer) runInParallel(action actionFunc) error {
 }
 
 func (in *Installer) runInBackground(wg *sync.WaitGroup, action actionFunc, dep *vending.Dependency, out chan *vending.DependencyLock) error {
-	repo := NewRepository(in.cacheDir, dep)
+	repo := NewRepository(in.cacheManager, dep)
 	lock, _ := in.lock.FindByURL(dep.URL)
 	dependencyInstaller := newDependencyInstaller(in.spec, dep, lock, repo)
 

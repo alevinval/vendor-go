@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"path/filepath"
 
+	"github.com/alevinval/vendor-go/internal/cache"
 	"github.com/alevinval/vendor-go/pkg/vending"
 )
 
@@ -14,12 +15,12 @@ type Repository struct {
 	path string
 }
 
-func NewRepository(cacheDir string, dep *vending.Dependency) *Repository {
+func NewRepository(manager *cache.Manager, dep *vending.Dependency) *Repository {
 	return &Repository{
 		dep:  dep,
 		git:  &Git{},
-		path: getRepositoryPath(cacheDir, dep),
-		lock: NewLock(getRepositoryLockPath(cacheDir, dep)),
+		path: manager.GetRepositoryPath(dep),
+		lock: NewLock(manager.GetRepositoryLockPath(dep)),
 	}
 }
 
