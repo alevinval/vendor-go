@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path"
@@ -43,13 +45,19 @@ func resetCacheDir(preset vending.Preset) error {
 }
 
 func getRepositoryPath(cacheDir string, dep *vending.Dependency) string {
-	return path.Join(cacheDir, REPOS_DIR, dep.ID())
+	return path.Join(cacheDir, REPOS_DIR, getDependencyID(dep))
 }
 
 func getRepositoryLockPath(cacheDir string, dep *vending.Dependency) string {
-	return path.Join(cacheDir, LOCKS_DIR, dep.ID())
+	return path.Join(cacheDir, LOCKS_DIR, getDependencyID(dep))
 }
 
 func ensureCacheErr(err error) error {
 	return fmt.Errorf("cannot bootstrap cache: %w", err)
+}
+
+func getDependencyID(dep *vending.Dependency) string {
+	sha := sha256.New()
+	data := sha.Sum([]byte(dep.URL))
+	return hex.EncodeToString(data)
 }

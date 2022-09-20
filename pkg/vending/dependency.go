@@ -1,10 +1,5 @@
 package vending
 
-import (
-	"crypto/sha256"
-	"encoding/hex"
-)
-
 // Dependency holds relevant information related to a dependency that has to be
 // vendored. This model directly maps to the serialized YAML, for dependencies.
 type Dependency struct {
@@ -36,14 +31,6 @@ func NewDependencyLock(url, commit string) *DependencyLock {
 		URL:    url,
 		Commit: commit,
 	}
-}
-
-// ID returns the unique identifier for that dependency.
-// It returns the sha256 of the URL.
-func (d *Dependency) ID() string {
-	sha := sha256.New()
-	data := sha.Sum([]byte(d.URL))
-	return hex.EncodeToString(data)
 }
 
 // Update changes the URL, Branch and Filters fields of the dependency by the
