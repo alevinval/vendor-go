@@ -6,14 +6,39 @@ import (
 	"github.com/alevinval/vendor-go/internal"
 	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/alevinval/vendor-go/pkg/vending"
-	"go.uber.org/zap/zapcore"
-
 	"github.com/spf13/cobra"
+	"go.uber.org/zap/zapcore"
 )
 
-var (
-	isDebugEnabled bool
-)
+var isDebugEnabled bool
+
+// NewCobraCommand returns a configured cobra command that serves as entry point
+// to the vending CLI.
+func NewCobraCommand(opts ...Option) *cobra.Command {
+	b := &cmdBuilder{}
+	for _, opt := range opts {
+		opt(b)
+	}
+	return b.build()
+}
+
+type cmdBuilder struct {
+	preset      vending.Preset
+	commandName string
+}
+
+func (cb *cmdBuilder) build() *cobra.Command {
+	rootCmd := newRootCmd(cb.commandName)
+	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
+
+	orchestrator := internal.NewOrchestrator(cb.preset)
+	rootCmd.AddCommand(newInitCmd(orchestrator))
+	rootCmd.AddCommand(newAddCmd(orchestrator))
+	rootCmd.AddCommand(newInstallCmd(orchestrator))
+	rootCmd.AddCommand(newUpdateCmd(orchestrator))
+	rootCmd.AddCommand(newCleanCacheCmd(orchestrator))
+	return rootCmd
+}
 
 func newRootCmd(commandName string) *cobra.Command {
 	return &cobra.Command{
@@ -93,19 +118,4 @@ func newCleanCacheCmd(co *internal.CmdOrchestrator) *cobra.Command {
 			}
 		},
 	}
-}
-
-// NewVendingCmd returns a configured cobra command that serves as entry point
-// to the vending CLI.
-func NewVendingCmd(commandName string, preset vending.Preset) *cobra.Command {
-	rootCmd := newRootCmd(commandName)
-	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
-
-	orchestrator := internal.NewOrchestrator(preset)
-	rootCmd.AddCommand(newInitCmd(orchestrator))
-	rootCmd.AddCommand(newAddCmd(orchestrator))
-	rootCmd.AddCommand(newInstallCmd(orchestrator))
-	rootCmd.AddCommand(newUpdateCmd(orchestrator))
-	rootCmd.AddCommand(newCleanCacheCmd(orchestrator))
-	return rootCmd
 }
