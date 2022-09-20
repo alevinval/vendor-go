@@ -5,17 +5,19 @@ import (
 	"os"
 	"path"
 
+	"github.com/alevinval/vendor-go/internal/cache"
 	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/alevinval/vendor-go/pkg/vending"
 	"github.com/fatih/color"
 )
 
 type CmdOrchestrator struct {
-	preset vending.Preset
+	preset       vending.Preset
+	cacheManager *cache.Manager
 }
 
 func NewOrchestrator(preset vending.Preset) *CmdOrchestrator {
-	return &CmdOrchestrator{preset}
+	return &CmdOrchestrator{preset, cache.NewManager(preset)}
 }
 
 func (co *CmdOrchestrator) Init() error {
@@ -55,7 +57,7 @@ func (co *CmdOrchestrator) Install() error {
 	cacheDir := co.preset.GetCacheDir()
 	log.S().Infof("repository cache located at %s", cacheDir)
 
-	m := NewInstaller(cacheDir, spec, specLock)
+	m := NewInstaller(co.cacheManager, spec, specLock)
 	err = m.Install()
 	if err != nil {
 		return fmt.Errorf("install failed: %w", err)
@@ -95,7 +97,7 @@ func (co *CmdOrchestrator) Update() error {
 	cacheDir := co.preset.GetCacheDir()
 	log.S().Infof("repository cache located at %s", cacheDir)
 
-	m := NewInstaller(cacheDir, spec, specLock)
+	m := NewInstaller(co.cacheManager, spec, specLock)
 	err = m.Update()
 	if err != nil {
 		return fmt.Errorf("update failed: %w", err)
@@ -137,7 +139,7 @@ func (co *CmdOrchestrator) AddDependency(url, branch string) error {
 }
 
 func (co *CmdOrchestrator) CleanCache() error {
-	err := resetCacheDir(co.preset)
+	err := co.cacheManager.Reset()
 	if err != nil {
 		return fmt.Errorf("cannot clean cache: %w", err)
 	}
@@ -145,7 +147,7 @@ func (co *CmdOrchestrator) CleanCache() error {
 }
 
 func (co *CmdOrchestrator) getCacheLock() (*Lock, error) {
-	err := ensureCacheDir(co.preset)
+	err := co.cacheManager.Ensure()
 	if err != nil {
 		return nil, fmt.Errorf("cannot create cache: %w", err)
 	}
