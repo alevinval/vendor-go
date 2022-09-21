@@ -1,4 +1,4 @@
-package internal
+package installer
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type Installer struct {
 	cacheManager *cache.Manager
 }
 
-func NewInstaller(cacheManager *cache.Manager, spec *vending.Spec, specLock *vending.SpecLock) *Installer {
+func New(cacheManager *cache.Manager, spec *vending.Spec, specLock *vending.SpecLock) *Installer {
 	return &Installer{
 		spec,
 		specLock,

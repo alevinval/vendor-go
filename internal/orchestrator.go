@@ -1,3 +1,6 @@
+// TODO: orchestrator will eventually be moved to pkg/vending, since it provides
+// the basic instrument to orchestrate the tool operations, it makes sense
+// that users have access to it.
 package internal
 
 import (
@@ -5,6 +8,7 @@ import (
 	"os"
 
 	"github.com/alevinval/vendor-go/internal/cache"
+	"github.com/alevinval/vendor-go/internal/installer"
 	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/alevinval/vendor-go/pkg/vending"
 	"github.com/fatih/color"
@@ -58,8 +62,8 @@ func (co *CmdOrchestrator) Install() error {
 	cacheDir := co.preset.GetCacheDir()
 	log.S().Infof("repository cache located at %s", cacheDir)
 
-	m := NewInstaller(co.cacheManager, spec, specLock)
-	err = m.Install()
+	ins := installer.New(co.cacheManager, spec, specLock)
+	err = ins.Install()
 	if err != nil {
 		return fmt.Errorf("install failed: %w", err)
 	}
@@ -100,8 +104,8 @@ func (co *CmdOrchestrator) Update() error {
 	cacheDir := co.preset.GetCacheDir()
 	log.S().Infof("repository cache located at %s", cacheDir)
 
-	m := NewInstaller(co.cacheManager, spec, specLock)
-	err = m.Update()
+	ins := installer.New(co.cacheManager, spec, specLock)
+	err = ins.Update()
 	if err != nil {
 		return fmt.Errorf("update failed: %w", err)
 	}

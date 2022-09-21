@@ -11,16 +11,16 @@ import (
 type Repository struct {
 	dep  *vending.Dependency
 	git  *Git
-	path string
 	lock *lock.Lock
+	path string
 }
 
 func NewRepository(path string, lock *lock.Lock, dep *vending.Dependency) *Repository {
 	return &Repository{
 		dep:  dep,
 		git:  &Git{},
-		path: path,
 		lock: lock,
+		path: path,
 	}
 }
 
@@ -28,7 +28,7 @@ func (r *Repository) Path() string {
 	return r.path
 }
 
-func (r *Repository) Ensure() error {
+func (r *Repository) OpenOrClone() error {
 	return r.git.OpenOrClone(r.dep.URL, r.dep.Branch, r.Path())
 }
 
