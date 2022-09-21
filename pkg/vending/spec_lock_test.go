@@ -33,16 +33,16 @@ func TestSpecLock_BumpsVersion_WhenSpecIsOlder(t *testing.T) {
 	sut := NewSpecLock(&TestPreset{})
 	sut.Version = "v0.0.1"
 
-	sut.applyPreset()
+	sut.applyPreset(sut.preset)
 
 	assert.Equal(t, VERSION, sut.Version)
 }
 
 func TestSpecLock_DoesNotBumpVersion_WhenSpecIsNewer(t *testing.T) {
-	spec := NewSpec(&TestPreset{})
-	spec.Version = "v999.0.0"
+	sut := NewSpecLock(&TestPreset{})
+	sut.Version = "v999.0.0"
 
-	spec.applyPreset(&TestPreset{})
+	sut.applyPreset(sut.preset)
 
-	assert.Equal(t, "v999.0.0", spec.Version)
+	assert.Equal(t, "v999.0.0", sut.Version)
 }

@@ -43,12 +43,14 @@ func (co *CmdOrchestrator) Install() error {
 	}
 	defer lock.Release()
 
-	spec, err := vending.LoadSpec(co.preset)
+	spec := vending.NewSpec(co.preset)
+	err = spec.Load()
 	if err != nil {
 		return fmt.Errorf("cannot install: %w", err)
 	}
 
-	specLock, err := vending.LoadSpecLock(co.preset)
+	specLock := vending.NewSpecLock(co.preset)
+	err = specLock.Load()
 	if err != nil {
 		return fmt.Errorf("cannot install: %w", err)
 	}
@@ -83,12 +85,14 @@ func (co *CmdOrchestrator) Update() error {
 	}
 	defer lock.Release()
 
-	spec, err := vending.LoadSpec(co.preset)
+	spec := vending.NewSpec(co.preset)
+	err = spec.Load()
 	if err != nil {
 		return fmt.Errorf("cannot update: %w", err)
 	}
 
-	specLock, err := vending.LoadSpecLock(co.preset)
+	specLock := vending.NewSpecLock(co.preset)
+	err = specLock.Load()
 	if err != nil {
 		return fmt.Errorf("cannot update: %w", err)
 	}
@@ -117,7 +121,8 @@ func (co *CmdOrchestrator) Update() error {
 }
 
 func (co *CmdOrchestrator) AddDependency(url, branch string) error {
-	spec, err := vending.LoadSpec(co.preset)
+	spec := vending.NewSpec(co.preset)
+	err := spec.Load()
 	if err != nil {
 		return fmt.Errorf("cannot add dependency: %w", err)
 	}
