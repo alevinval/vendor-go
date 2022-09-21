@@ -66,8 +66,9 @@ func (f *Filters) ApplyPreset(preset Preset) *Filters {
 		ApplyFilters(preset.GetFilters())
 }
 
+// TODO: Rename method to something more describing
 // ApplyDep applies the filters of a Preset, and a Dependency.
-func (f *Filters) ApplyDependencyPreset(preset Preset, dep *Dependency) *Filters {
+func (f *Filters) ApplyDep(preset Preset, dep *Dependency) *Filters {
 	if preset.ForceFilters() {
 		f.Clear()
 	}
@@ -76,6 +77,7 @@ func (f *Filters) ApplyDependencyPreset(preset Preset, dep *Dependency) *Filters
 		ApplyFilters(preset.GetFiltersForDependency(dep))
 }
 
+// Clear resets the lists.
 func (f *Filters) Clear() *Filters {
 	f.Extensions = []string{}
 	f.Targets = []string{}

@@ -43,5 +43,5 @@ func (d *Dependency) Update(other *Dependency) {
 }
 
 func (d *Dependency) applyPreset(preset Preset) {
-	d.Filters.ApplyDependencyPreset(preset, d)
+	d.Filters.ApplyDep(preset, d)
 }
