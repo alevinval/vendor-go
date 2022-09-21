@@ -60,7 +60,7 @@ func TestManager_GetRepositoryPath(t *testing.T) {
 	dep := vending.NewDependency("some-url", "some-branch")
 	sut := NewManager(&TestPreset{})
 
-	actual := sut.GetRepositoryPath(dep)
+	actual := sut.getRepositoryPath(dep)
 
 	assert.Equal(t,
 		".test-cache-dir/repos/736f6d652d75726ce3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -72,7 +72,7 @@ func TestManager_GetRepositoryLockPath(t *testing.T) {
 	dep := vending.NewDependency("some-url", "some-branch")
 	sut := NewManager(&TestPreset{})
 
-	actual := sut.GetRepositoryLockPath(dep)
+	actual := sut.getRepositoryLockPath(dep)
 
 	assert.Equal(t,
 		".test-cache-dir/locks/736f6d652d75726ce3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

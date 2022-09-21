@@ -13,14 +13,14 @@ import (
 
 type Installer struct {
 	spec         *vending.Spec
-	lock         *vending.SpecLock
+	specLock     *vending.SpecLock
 	cacheManager *cache.Manager
 }
 
-func NewInstaller(cacheManager *cache.Manager, spec *vending.Spec, lock *vending.SpecLock) *Installer {
+func NewInstaller(cacheManager *cache.Manager, spec *vending.Spec, specLock *vending.SpecLock) *Installer {
 	return &Installer{
 		spec,
-		lock,
+		specLock,
 		cacheManager,
 	}
 }
@@ -36,11 +36,11 @@ func (in *Installer) Update() error {
 func (in *Installer) runInParallel(action actionFunc) error {
 	resetVendorDir(in.spec.VendorDir)
 
-	N := len(in.spec.Deps)
-	out := make(chan *vending.DependencyLock, N)
+	n := len(in.spec.Deps)
+	out := make(chan *vending.DependencyLock, n)
 	errors := make(chan error, 1)
 	wg := &sync.WaitGroup{}
-	wg.Add(N)
+	wg.Add(n)
 
 	for _, dep := range in.spec.Deps {
 		go in.runInBackground(wg, action, dep, out)
@@ -62,24 +62,28 @@ func (in *Installer) runInParallel(action actionFunc) error {
 		}
 	}
 
-	for N > 0 {
+	for n > 0 {
 		dependencyLock := <-out
 
 		log.S().Infof("locking %s\n  🔒 %s",
 			color.CyanString(dependencyLock.URL),
 			color.YellowString(dependencyLock.Commit),
 		)
-		in.lock.AddDependencyLock(dependencyLock)
+		in.specLock.AddDependencyLock(dependencyLock)
 
-		N--
+		n--
 	}
 
 	return nil
 }
 
 func (in *Installer) runInBackground(wg *sync.WaitGroup, action actionFunc, dep *vending.Dependency, out chan *vending.DependencyLock) error {
-	repo := NewRepository(in.cacheManager, dep)
-	lock, _ := in.lock.FindByURL(dep.URL)
+	repo, err := in.cacheManager.GetRepository(dep)
+	if err != nil {
+		return fmt.Errorf("cannot complete action: %w", err)
+	}
+
+	lock, _ := in.specLock.FindByURL(dep.URL)
 	dependencyInstaller := newDependencyInstaller(in.spec, dep, lock, repo)
 
 	dependencyLock, err := action(dependencyInstaller)
