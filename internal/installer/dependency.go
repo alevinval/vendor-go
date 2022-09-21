@@ -1,4 +1,4 @@
-package internal
+package installer
 
 import (
 	"fmt"
@@ -37,7 +37,7 @@ func (d *dependencyInstaller) Install() (*vending.DependencyLock, error) {
 	}
 	defer lock.Release()
 
-	err = d.repo.Ensure()
+	err = d.repo.OpenOrClone()
 	if err != nil {
 		return nil, fmt.Errorf("cannot ensure repository: %w", err)
 	}
@@ -71,7 +71,7 @@ func (d *dependencyInstaller) Update() (*vending.DependencyLock, error) {
 	}
 	defer lock.Release()
 
-	err = d.repo.Ensure()
+	err = d.repo.OpenOrClone()
 	if err != nil {
 		return nil, fmt.Errorf("cannot open repository: %s", err)
 	}
