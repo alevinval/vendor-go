@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 
+	"github.com/alevinval/vendor-go/internal/git"
 	"github.com/alevinval/vendor-go/internal/importer"
 	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/alevinval/vendor-go/pkg/vending"
@@ -13,11 +14,11 @@ import (
 type dependencyInstaller struct {
 	dep             *vending.Dependency
 	depLock         *vending.DependencyLock
-	repo            *Repository
+	repo            *git.Repository
 	importWalkDirFn fs.WalkDirFunc
 }
 
-func newDependencyInstaller(spec *vending.Spec, dep *vending.Dependency, depLock *vending.DependencyLock, repo *Repository) *dependencyInstaller {
+func newDependencyInstaller(spec *vending.Spec, dep *vending.Dependency, depLock *vending.DependencyLock, repo *git.Repository) *dependencyInstaller {
 	selector := importer.NewSelector(spec, dep)
 	importWalkDirFn := importer.WalkDirFunc(selector, repo.Path(), spec.VendorDir)
 
@@ -30,11 +31,11 @@ func newDependencyInstaller(spec *vending.Spec, dep *vending.Dependency, depLock
 }
 
 func (d *dependencyInstaller) Install() (*vending.DependencyLock, error) {
-	err := d.repo.Acquire()
+	lock, err := d.repo.Lock()
 	if err != nil {
 		return nil, fmt.Errorf("cannot acquire repository lock: %w", err)
 	}
-	defer d.repo.Release()
+	defer lock.Release()
 
 	err = d.repo.Ensure()
 	if err != nil {
@@ -64,11 +65,11 @@ func (d *dependencyInstaller) Install() (*vending.DependencyLock, error) {
 }
 
 func (d *dependencyInstaller) Update() (*vending.DependencyLock, error) {
-	err := d.repo.Acquire()
+	lock, err := d.repo.Lock()
 	if err != nil {
 		return nil, fmt.Errorf("cannot acquire repository lock: %w", err)
 	}
-	defer d.repo.Release()
+	defer lock.Release()
 
 	err = d.repo.Ensure()
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/alevinval/vendor-go/internal/git"
 	"github.com/alevinval/vendor-go/internal/lock"
 	"github.com/alevinval/vendor-go/pkg/vending"
 )
@@ -61,14 +62,6 @@ func (man *Manager) Reset() error {
 	return man.Ensure()
 }
 
-func (man *Manager) GetRepositoryPath(dep *vending.Dependency) string {
-	return path.Join(man.preset.GetCacheDir(), REPOS_DIR, getDependencyID(dep))
-}
-
-func (man *Manager) GetRepositoryLockPath(dep *vending.Dependency) string {
-	return path.Join(man.preset.GetCacheDir(), LOCKS_DIR, getDependencyID(dep))
-}
-
 func (man *Manager) LockCache() (*lock.Lock, error) {
 	err := man.Ensure()
 	if err != nil {
@@ -85,8 +78,54 @@ func (man *Manager) LockCache() (*lock.Lock, error) {
 	return lock, nil
 }
 
+func (man *Manager) GetRepository(dep *vending.Dependency) (*git.Repository, error) {
+	lock, err := man.getRepositoryLock(dep)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get repository: %w", err)
+	}
+	return git.NewRepository(
+		man.getRepositoryPath(dep),
+		lock,
+		dep,
+	), nil
+}
+
+func (man *Manager) getRepositoryLock(dep *vending.Dependency) (*lock.Lock, error) {
+	err := man.Ensure()
+	if err != nil {
+		return nil, fmt.Errorf("cannot lock repository: %w", err)
+	}
+
+	lockPath := man.getRepositoryLockPath(dep)
+	lock := lock.New(lockPath)
+	if err != nil {
+		return nil, fmt.Errorf("cannot acquire repository lock %q: %w", lockPath, err)
+	}
+
+	return lock, nil
+}
+
 func (man *Manager) getCacheLockPath() string {
-	return path.Join(man.preset.GetCacheDir(), "LOCK")
+	return path.Join(
+		man.preset.GetCacheDir(),
+		"LOCK",
+	)
+}
+
+func (man *Manager) getRepositoryLockPath(dep *vending.Dependency) string {
+	return path.Join(
+		man.preset.GetCacheDir(),
+		LOCKS_DIR,
+		getDependencyID(dep),
+	)
+}
+
+func (man *Manager) getRepositoryPath(dep *vending.Dependency) string {
+	return path.Join(
+		man.preset.GetCacheDir(),
+		REPOS_DIR,
+		getDependencyID(dep),
+	)
 }
 
 func ensureCacheErr(err error) error {
