@@ -2,12 +2,15 @@ package vending
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 var _ Preset = (*TestPreset)(nil)
+
+var testPreset = &TestPreset{}
 
 type TestPreset struct {
 	force bool
@@ -52,11 +55,17 @@ func (tp *TestPreset) GetFiltersForDependency(dep *Dependency) *Filters {
 		AddExtension(extension).
 		AddTarget(target).
 		AddIgnore(ignore)
+}
 
+func (tp *TestPreset) cleanUp() {
+	os.RemoveAll(tp.GetCacheDir())
+	os.RemoveAll(tp.GetVendorDir())
+	os.RemoveAll(tp.GetSpecFilename())
+	os.RemoveAll(tp.GetSpecLockFilename())
 }
 
 func TestNewSpec_LoadsPreset(t *testing.T) {
-	spec := NewSpec(&TestPreset{})
+	spec := NewSpec(testPreset)
 	dep := NewDependency("some-url", "some-branch")
 	spec.AddDependency(dep)
 
@@ -77,7 +86,7 @@ func TestNewSpec_LoadsPreset(t *testing.T) {
 }
 
 func TestSpecAdd_AddsDeps(t *testing.T) {
-	sut := NewSpec(&TestPreset{})
+	sut := NewSpec(testPreset)
 	assert.Empty(t, sut.Deps)
 
 	dep := NewDependency("some-url", "some-branch")
@@ -145,4 +154,57 @@ func TestSpec_DoesNotBumpVersion_WhenSpecIsNewer(t *testing.T) {
 	spec.applyPreset(&TestPreset{})
 
 	assert.Equal(t, "v999.0.0", spec.Version)
+}
+
+func TestSpec_SaveThenLoad(t *testing.T) {
+	defer testPreset.cleanUp()
+
+	dep := NewDependency("some-url", "some-branch")
+	expected := NewSpec(testPreset)
+	expected.AddDependency(dep)
+
+	err := expected.Save()
+	assert.NoError(t, err)
+
+	actual := NewSpec(testPreset)
+	assert.NotEqual(t, expected, actual)
+
+	err = actual.Load()
+	assert.NoError(t, err)
+	assert.Equal(t, expected, actual)
+}
+
+func TestSpec_SaveOutput(t *testing.T) {
+	defer testPreset.cleanUp()
+
+	dep := NewDependency("some-url", "some-branch")
+	sut := NewSpec(&TestPreset{})
+	sut.AddDependency(dep)
+
+	err := sut.Save()
+	assert.NoError(t, err)
+
+	expected := `version: v0.4.0
+preset: test-preset
+vendor_dir: test-vendor-dir
+extensions:
+  - preset-extension
+targets:
+  - preset-target
+ignores:
+  - preset-ignore
+deps:
+  - url: some-url
+    branch: some-branch
+    extensions:
+      - preset-extension-for-some-url
+    targets:
+      - preset-target-for-some-url
+    ignores:
+      - preset-ignore-for-some-url
+`
+
+	actual, err := os.ReadFile("some-spec-filename")
+	assert.NoError(t, err)
+	assert.Equal(t, expected, string(actual))
 }

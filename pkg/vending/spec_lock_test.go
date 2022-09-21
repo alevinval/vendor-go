@@ -1,6 +1,7 @@
 package vending
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,16 +11,16 @@ func TestSpecLockAdd(t *testing.T) {
 	sut := NewSpecLock(nil)
 	assert.Empty(t, sut.Deps)
 
-	lock := NewDependencyLock("some-url", "some-commit")
-	sut.AddDependencyLock(lock)
+	depLock := NewDependencyLock("some-url", "some-commit")
+	sut.AddDependencyLock(depLock)
 
-	assert.Equal(t, []*DependencyLock{lock}, sut.Deps)
+	assert.Equal(t, []*DependencyLock{depLock}, sut.Deps)
 }
 
 func TestSpecLockAddUpdates(t *testing.T) {
-	lock := NewDependencyLock("some-url", "some-commit")
+	depLock := NewDependencyLock("some-url", "some-commit")
 	sut := NewSpecLock(nil)
-	sut.Deps = append(sut.Deps, lock)
+	sut.Deps = append(sut.Deps, depLock)
 
 	assert.Equal(t, "some-commit", sut.Deps[0].Commit)
 
@@ -45,4 +46,38 @@ func TestSpecLock_DoesNotBumpVersion_WhenSpecIsNewer(t *testing.T) {
 	sut.applyPreset(sut.preset)
 
 	assert.Equal(t, "v999.0.0", sut.Version)
+}
+
+func TestSpecLock_SaveAndLoad(t *testing.T) {
+	depLock := NewDependencyLock("some-url", "some-commit")
+	expected := NewSpecLock(testPreset)
+	expected.AddDependencyLock(depLock)
+
+	err := expected.Save()
+	assert.NoError(t, err)
+
+	actual := NewSpecLock(testPreset)
+	assert.NotEqual(t, expected, actual)
+
+	actual.Load()
+	assert.Equal(t, expected, actual)
+}
+
+func TestSpecLock_SaveOutput(t *testing.T) {
+	depLock := NewDependencyLock("some-url", "some-commit")
+	sut := NewSpecLock(testPreset)
+	sut.AddDependencyLock(depLock)
+
+	err := sut.Save()
+	assert.NoError(t, err)
+
+	expected := `version: v0.4.0
+deps:
+  - url: some-url
+    commit: some-commit
+`
+
+	actual, err := os.ReadFile(testPreset.GetSpecLockFilename())
+	assert.NoError(t, err)
+	assert.Equal(t, expected, string(actual))
 }
