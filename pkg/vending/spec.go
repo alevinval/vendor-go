@@ -91,24 +91,9 @@ func (s *Spec) applyPreset(preset Preset) {
 		s.Version = VERSION
 	}
 
-	if preset.ForceFilters() {
-		s.Filters = preset.GetFilters()
-	} else {
-		if s.Filters == nil {
-			s.Filters = NewFilters()
-		}
-		s.Filters.ApplyPreset(preset)
-	}
-
+	s.Filters.ApplyPreset(preset)
 	for _, dep := range s.Deps {
-		if preset.ForceFilters() {
-			dep.Filters = preset.GetFiltersForDependency(dep)
-		} else {
-			if dep.Filters == nil {
-				dep.Filters = NewFilters()
-			}
-			dep.Filters.ApplyDep(preset, dep)
-		}
+		dep.applyPreset(preset)
 	}
 }
 

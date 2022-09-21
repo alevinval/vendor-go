@@ -50,7 +50,7 @@ func TestFilters_ApplyPresetDep_UpdatesWithUnion(t *testing.T) {
 		AddTarget("target-2").
 		AddIgnore("ignore-2")
 
-	sut.ApplyDep(&TestPreset{}, dep)
+	sut.ApplyDependencyPreset(&TestPreset{}, dep)
 
 	assert.Equal(t, []string{"ext-1", "ext-2", "preset-extension-for-some-url"}, sut.Extensions)
 	assert.Equal(t, []string{"preset-target-for-some-url", "target-1", "target-2"}, sut.Targets)
@@ -68,4 +68,17 @@ func TestFilters_Clone_ReturnsNewInstance(t *testing.T) {
 
 	clone.AddExtension("ext-2")
 	assert.NotEqual(t, sut, clone)
+}
+
+func TestFilters_Clear_ThenClearsLists(t *testing.T) {
+	sut := NewFilters().
+		AddExtension("ext-1").
+		AddTarget("target-1").
+		AddIgnore("ignore-1")
+
+	assert.NotEqual(t, NewFilters(), sut)
+
+	sut.Clear()
+
+	assert.Equal(t, NewFilters(), sut)
 }

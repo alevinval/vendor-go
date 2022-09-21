@@ -59,15 +59,28 @@ func (f *Filters) ApplyFilters(filters *Filters) *Filters {
 
 // ApplyPreset applies the Filters of a Preset.
 func (f *Filters) ApplyPreset(preset Preset) *Filters {
+	if preset.ForceFilters() {
+		f.Clear()
+	}
 	return f.
 		ApplyFilters(preset.GetFilters())
 }
 
 // ApplyDep applies the filters of a Preset, and a Dependency.
-func (f *Filters) ApplyDep(preset Preset, dep *Dependency) *Filters {
+func (f *Filters) ApplyDependencyPreset(preset Preset, dep *Dependency) *Filters {
+	if preset.ForceFilters() {
+		f.Clear()
+	}
 	return f.
 		ApplyFilters(dep.Filters).
 		ApplyFilters(preset.GetFiltersForDependency(dep))
+}
+
+func (f *Filters) Clear() *Filters {
+	f.Extensions = []string{}
+	f.Targets = []string{}
+	f.Ignores = []string{}
+	return f
 }
 
 // Clone allocates a new instance, and clones the contents of the current one.
