@@ -25,26 +25,6 @@ type Spec struct {
 	preset     Preset        `yaml:"-"`
 }
 
-// LoadSpec loads a Spec given a Preset.
-func LoadSpec(preset Preset) (*Spec, error) {
-	preset = checkPreset(preset, true)
-
-	filename := preset.GetSpecFilename()
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("cannot read: %w", err)
-	}
-
-	spec := &Spec{}
-	err = yaml.Unmarshal(data, spec)
-	if err != nil {
-		return nil, fmt.Errorf("cannot parse: %w", err)
-	}
-
-	spec.applyPreset(preset)
-	return spec, nil
-}
-
 // NewSpec allocates a new Spec instance with the default initialization.
 func NewSpec(preset Preset) *Spec {
 	preset = checkPreset(preset, true)
@@ -65,6 +45,25 @@ func (s *Spec) AddDependency(dependency *Dependency) {
 		s.Deps = append(s.Deps, dependency)
 	}
 	s.applyPreset(s.preset)
+}
+
+// Load Spec from the filesystem.
+func (s *Spec) Load() error {
+	preset := s.preset
+
+	filename := preset.GetSpecFilename()
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("cannot read: %w", err)
+	}
+
+	err = yaml.Unmarshal(data, s)
+	if err != nil {
+		return fmt.Errorf("cannot parse: %w", err)
+	}
+
+	s.applyPreset(preset)
+	return nil
 }
 
 // Save converts the Spec to YAML, and writes the data in the spec file,
