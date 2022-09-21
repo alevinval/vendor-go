@@ -41,3 +41,7 @@ func (d *Dependency) Update(other *Dependency) {
 	d.Branch = other.Branch
 	d.Filters = other.Filters.Clone()
 }
+
+func (d *Dependency) applyPreset(preset Preset) {
+	d.Filters.ApplyDependencyPreset(preset, d)
+}
