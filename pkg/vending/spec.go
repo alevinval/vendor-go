@@ -1,6 +1,7 @@
 package vending
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -140,4 +141,16 @@ func checkPreset(preset Preset, warn bool) Preset {
 	}
 
 	return preset
+}
+
+func toYaml(obj interface{}) ([]byte, error) {
+	b := &bytes.Buffer{}
+	encoder := yaml.NewEncoder(b)
+	encoder.SetIndent(2)
+	err := encoder.Encode(obj)
+	if err != nil {
+		return nil, err
+	}
+	encoder.Close()
+	return b.Bytes(), nil
 }
