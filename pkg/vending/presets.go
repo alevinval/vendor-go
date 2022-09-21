@@ -75,8 +75,8 @@ func (dp *DefaultPreset) ForceFilters() bool {
 func (dp *DefaultPreset) GetCacheDir() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		log.S().Warnf("Cannot find user HOME dir, using tempdir instead")
-		return os.TempDir()
+		log.S().Warnf("Cannot find user home directory, using tempdir as home")
+		homeDir = os.TempDir()
 	}
 	return path.Join(homeDir, ".vending-cache")
 }

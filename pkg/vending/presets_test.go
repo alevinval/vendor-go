@@ -1,6 +1,7 @@
 package vending
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,4 +15,21 @@ func TestDefaultPreset(t *testing.T) {
 	assert.Equal(t, ".vendor-lock.yml", sut.GetSpecLockFilename())
 	assert.Equal(t, NewFilters(), sut.GetFilters())
 	assert.Equal(t, NewFilters(), sut.GetFiltersForDependency(nil))
+
+}
+
+func TestDefaultPreset_GetCacheDir_UsesHome(t *testing.T) {
+	os.Setenv("HOME", "some-home-path")
+
+	sut := DefaultPreset{}
+
+	assert.Equal(t, "some-home-path/.vending-cache", sut.GetCacheDir())
+}
+
+func TestDefaultPreset_GetCacheDir_DefaultsToTempDir(t *testing.T) {
+	os.Clearenv()
+
+	sut := DefaultPreset{}
+
+	assert.Equal(t, "/tmp/.vending-cache", sut.GetCacheDir())
 }
