@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/alevinval/vendor-go/internal/git"
 	"github.com/alevinval/vendor-go/pkg/vending"
@@ -60,10 +59,13 @@ func (imp *Importer) collect() (*targetCollector, error) {
 func collectPathsFunc(srcRoot, dstRoot string, selector *Selector, collector *targetCollector) fs.WalkDirFunc {
 	return func(path string, _ os.DirEntry, err error) error {
 		if err != nil {
-			return fmt.Errorf("select path interrupted: %w", err)
+			return fmt.Errorf("path collection interrupted: %w", err)
 		}
 
-		relativePath := strings.TrimPrefix(path, srcRoot)
+		relativePath, err := filepath.Rel(srcRoot, path)
+		if err != nil {
+			return fmt.Errorf("cannot get relative path: %w", err)
+		}
 
 		if selector.Select(relativePath) {
 			collector.add(
