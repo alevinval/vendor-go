@@ -20,7 +20,7 @@ func TestSelector(t *testing.T) {
 		AddTarget("dep-target").
 		AddIgnore("dep-ignore")
 
-	sut := NewSelector(spec, dep)
+	sut := newSelector(spec, dep)
 	assert.Equal(t, spec.Filters.Clone().ApplyFilters(dep.Filters), sut.filters)
 }
 

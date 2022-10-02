@@ -11,7 +11,7 @@ type Selector struct {
 	filters *vending.Filters
 }
 
-func NewSelector(spec *vending.Spec, dep *vending.Dependency) *Selector {
+func newSelector(spec *vending.Spec, dep *vending.Dependency) *Selector {
 	filters := spec.Filters.Clone().ApplyFilters(dep.Filters)
 	return &Selector{
 		filters,
