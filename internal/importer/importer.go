@@ -8,10 +8,32 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/alevinval/vendor-go/internal/git"
 	"github.com/alevinval/vendor-go/pkg/log"
+	"github.com/alevinval/vendor-go/pkg/vending"
 )
 
-func WalkDirFunc(selector *Selector, srcRoot, dstRoot string) fs.WalkDirFunc {
+type Importer struct {
+	repo *git.Repository
+	spec *vending.Spec
+	dep  *vending.Dependency
+}
+
+func New(repo *git.Repository, spec *vending.Spec, dep *vending.Dependency) *Importer {
+	return &Importer{
+		repo,
+		spec,
+		dep,
+	}
+}
+
+func (imp *Importer) Import() error {
+	selector := newSelector(imp.spec, imp.dep)
+	importWalkDirFn := walkDirFunc(selector, imp.repo.Path(), imp.spec.VendorDir)
+	return imp.repo.WalkDir(importWalkDirFn)
+}
+
+func walkDirFunc(selector *Selector, srcRoot, dstRoot string) fs.WalkDirFunc {
 	return func(path string, _ os.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("import interrupted: %w", err)

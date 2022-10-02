@@ -2,7 +2,6 @@ package installer
 
 import (
 	"fmt"
-	"io/fs"
 
 	"github.com/alevinval/vendor-go/internal/git"
 	"github.com/alevinval/vendor-go/internal/importer"
@@ -12,21 +11,20 @@ import (
 )
 
 type dependencyInstaller struct {
-	dep             *vending.Dependency
-	depLock         *vending.DependencyLock
-	repo            *git.Repository
-	importWalkDirFn fs.WalkDirFunc
+	dep     *vending.Dependency
+	depLock *vending.DependencyLock
+	repo    *git.Repository
+	imp     *importer.Importer
 }
 
 func newDependencyInstaller(spec *vending.Spec, dep *vending.Dependency, depLock *vending.DependencyLock, repo *git.Repository) *dependencyInstaller {
-	selector := importer.NewSelector(spec, dep)
-	importWalkDirFn := importer.WalkDirFunc(selector, repo.Path(), spec.VendorDir)
+	imp := importer.New(repo, spec, dep)
 
 	return &dependencyInstaller{
-		dep:             dep,
-		depLock:         depLock,
-		repo:            repo,
-		importWalkDirFn: importWalkDirFn,
+		dep:     dep,
+		depLock: depLock,
+		repo:    repo,
+		imp:     imp,
 	}
 }
 
@@ -95,7 +93,7 @@ func (d *dependencyInstaller) Update() (*vending.DependencyLock, error) {
 }
 
 func (d *dependencyInstaller) importFiles() (*vending.DependencyLock, error) {
-	err := d.repo.WalkDir(d.importWalkDirFn)
+	err := d.imp.Import()
 	if err != nil {
 		return nil, fmt.Errorf("cannot import files: %w", err)
 	}
