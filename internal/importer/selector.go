@@ -40,9 +40,12 @@ func (sel *Selector) hasExt(path string) bool {
 	if ext == "" {
 		return false
 	}
+
+	// Ignore initial dot that filepath.Ext returns
+	ext = ext[1:]
+
 	for _, targetExt := range sel.filters.Extensions {
-		// Ignore initial dot that filepath.Ext returns
-		if strings.EqualFold(ext[1:], targetExt) {
+		if strings.EqualFold(ext, targetExt) {
 			return true
 		}
 	}

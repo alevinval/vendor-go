@@ -2,23 +2,23 @@ package importer
 
 import (
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/alevinval/vendor-go/internal/git"
-	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/alevinval/vendor-go/pkg/vending"
 )
 
+// Importer knows how to copy files from a source path to a destination path.
 type Importer struct {
 	repo *git.Repository
 	spec *vending.Spec
 	dep  *vending.Dependency
 }
 
+// New allocates a new Importer instance.
 func New(repo *git.Repository, spec *vending.Spec, dep *vending.Dependency) *Importer {
 	return &Importer{
 		repo,
@@ -27,57 +27,54 @@ func New(repo *git.Repository, spec *vending.Spec, dep *vending.Dependency) *Imp
 	}
 }
 
+// Import executes the import operation by copying files from the source to the
+// destination.
 func (imp *Importer) Import() error {
-	selector := newSelector(imp.spec, imp.dep)
-	importWalkDirFn := walkDirFunc(selector, imp.repo.Path(), imp.spec.VendorDir)
-	return imp.repo.WalkDir(importWalkDirFn)
+	collector, err := imp.collect()
+	if err != nil {
+		return fmt.Errorf("cannot import: %w", err)
+	}
+	err = collector.copyAll()
+	if err != nil {
+		return fmt.Errorf("cannot import: %w", err)
+	}
+	return nil
 }
 
-func walkDirFunc(selector *Selector, srcRoot, dstRoot string) fs.WalkDirFunc {
+func (imp *Importer) collect() (*targetCollector, error) {
+	selector := newSelector(imp.spec, imp.dep)
+	targetCollector := &targetCollector{targets: []target{}}
+
+	err := imp.repo.WalkDir(
+		collectPathsFunc(
+			imp.repo.Path(),
+			imp.spec.VendorDir,
+			selector,
+			targetCollector,
+		),
+	)
+
+	return targetCollector, err
+}
+
+func collectPathsFunc(srcRoot, dstRoot string, selector *Selector, collector *targetCollector) fs.WalkDirFunc {
 	return func(path string, _ os.DirEntry, err error) error {
 		if err != nil {
-			return fmt.Errorf("import interrupted: %w", err)
+			return fmt.Errorf("select path interrupted: %w", err)
 		}
 
 		relativePath := strings.TrimPrefix(path, srcRoot)
-		if !selector.Select(relativePath) {
-			return nil
+
+		if selector.Select(relativePath) {
+			collector.add(
+				target{
+					srcRelative: relativePath,
+					src:         path,
+					dst:         filepath.Join(dstRoot, relativePath),
+				},
+			)
 		}
 
-		dst := filepath.Join(dstRoot, relativePath)
-		log.S().Debugf("  ..%s -> %s", relativePath, dst)
-
-		dstDir := filepath.Dir(dst)
-		err = os.MkdirAll(dstDir, os.ModePerm)
-		if err != nil {
-			return fmt.Errorf("cannot create target path %q: %w", dstDir, err)
-		}
-		return copyFile(path, dst)
+		return nil
 	}
-}
-
-func copyFile(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return fmt.Errorf("cannot open %q: %w", src, err)
-	}
-	defer in.Close()
-
-	out, err := os.Create(dst)
-	if err != nil {
-		return fmt.Errorf("cannot create %q: %w", dst, err)
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, in)
-	if err != nil {
-		return fmt.Errorf("cannot copy %q => %q: %w", src, dst, err)
-	}
-
-	err = out.Close()
-	if err != nil {
-		return fmt.Errorf("cannot close %q: %w", dst, err)
-	}
-
-	return nil
 }
