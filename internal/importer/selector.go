@@ -13,6 +13,7 @@ type Selector struct {
 
 func newSelector(spec *vending.Spec, dep *vending.Dependency) *Selector {
 	filters := spec.Filters.Clone().ApplyFilters(dep.Filters)
+
 	return &Selector{
 		filters,
 	}
@@ -23,16 +24,11 @@ func (sel *Selector) Select(path string) bool {
 }
 
 func (sel *Selector) isTarget(path string) bool {
-	if len(sel.filters.Targets) == 0 {
-		return true
-	}
+	return hasPrefix(path, sel.filters.Targets) || len(sel.filters.Targets) == 0
+}
 
-	for _, target := range sel.filters.Targets {
-		if hasPrefix(path, target) {
-			return true
-		}
-	}
-	return false
+func (sel *Selector) isIgnored(path string) bool {
+	return hasPrefix(path, sel.filters.Ignores)
 }
 
 func (sel *Selector) hasExt(path string) bool {
@@ -53,17 +49,11 @@ func (sel *Selector) hasExt(path string) bool {
 	return false
 }
 
-func (sel *Selector) isIgnored(path string) bool {
-	for _, prefix := range sel.filters.Ignores {
-		if hasPrefix(path, prefix) {
+func hasPrefix(path string, prefixes []string) bool {
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(path, prefix) {
 			return true
 		}
 	}
 	return false
-}
-
-func hasPrefix(path, prefix string) bool {
-	path = strings.TrimPrefix(path, "/")
-	prefix = strings.TrimPrefix(prefix, "/")
-	return strings.HasPrefix(path, prefix)
 }

@@ -27,7 +27,7 @@ func (tc *targetCollector) copyAll() error {
 	for _, target := range tc.targets {
 		err := target.copy()
 		if err != nil {
-			return fmt.Errorf("cannot copyAll: %w", err)
+			return fmt.Errorf("cannot copy target: %w", err)
 		}
 	}
 	return nil
@@ -43,7 +43,7 @@ func (t *target) copy() error {
 	}
 	err = copyFile(t.src, t.dst)
 	if err != nil {
-		return fmt.Errorf("cannot import: %w", err)
+		return fmt.Errorf("cannot copy file: %w", err)
 	}
 	return nil
 }
