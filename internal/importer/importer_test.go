@@ -8,9 +8,15 @@ import (
 
 	"github.com/alevinval/vendor-go/internal/git"
 	"github.com/alevinval/vendor-go/internal/lock"
+	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/alevinval/vendor-go/pkg/vending"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zapcore"
 )
+
+func init() {
+	log.Level.SetLevel(zapcore.DebugLevel)
+}
 
 const VENDOR_DIR = ".testvendor"
 const INPUT_DIR = ".testinput"
