@@ -66,7 +66,9 @@ func hasPrefix(path string, prefixes []string) bool {
 }
 
 func inverseHasPrefix(paths []string, prefix string) bool {
+	prefix = normDir(prefix)
 	for _, path := range paths {
+		path = normDir(path)
 		if len(prefix) > len(path) {
 			path, prefix = prefix, path
 		}
@@ -75,4 +77,12 @@ func inverseHasPrefix(paths []string, prefix string) bool {
 		}
 	}
 	return false
+}
+
+func normDir(path string) string {
+	pathDir := filepath.Dir(path)
+	if pathDir == "." {
+		pathDir = path
+	}
+	return pathDir
 }

@@ -42,6 +42,7 @@ func TestSelectorSelect_WithTargets(t *testing.T) {
 
 	assertSelection(t, sut, "nontarget/a/b", false, false)
 	assertSelection(t, sut, "ignored/a/b", false, false)
+	assertSelection(t, sut, "target", false, true)
 }
 
 func TestSelectorSelect_WithoutTargets(t *testing.T) {
