@@ -46,7 +46,7 @@ func (b *builder) buildCobra() *cobra.Command {
 func newRootCmd(commandName string) *cobra.Command {
 	return &cobra.Command{
 		Use:   commandName,
-		Short: fmt.Sprintf("[%s] %s is a flexible and customizable vending tool", vending.VERSION, commandName),
+		Short: fmt.Sprintf("%s is a flexible and customizable vending tool (%s)", commandName, vending.VERSION),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if isDebugEnabled {
 				log.Level.SetLevel(zapcore.DebugLevel)
