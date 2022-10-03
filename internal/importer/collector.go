@@ -34,7 +34,7 @@ func (tc *targetCollector) copyAll() error {
 }
 
 func (t *target) copy() error {
-	log.S().Debugf("  ..%s -> %s", t.srcRelative, t.dst)
+	log.S().Debugf("  [copy] ../%s -> %s", t.srcRelative, t.dst)
 
 	dstDir := filepath.Dir(t.dst)
 	err := os.MkdirAll(dstDir, os.ModePerm)

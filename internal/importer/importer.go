@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/alevinval/vendor-go/internal/git"
+	"github.com/alevinval/vendor-go/pkg/log"
 	"github.com/alevinval/vendor-go/pkg/vending"
 )
 
@@ -81,6 +82,7 @@ func collectPathsFunc(srcRoot, dstRoot string, selector *Selector, collector *ta
 				},
 			)
 		} else if entry.IsDir() && !shouldEnterDir {
+			log.S().Debugf("  [skip] %s", relativePath)
 			return fs.SkipDir
 		}
 
