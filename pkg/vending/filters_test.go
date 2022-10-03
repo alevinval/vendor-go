@@ -50,7 +50,7 @@ func TestFilters_ApplyPresetDep_UpdatesWithUnion(t *testing.T) {
 		AddTarget("target-2").
 		AddIgnore("ignore-2")
 
-	sut.ApplyDep(&TestPreset{}, dep)
+	sut.ApplyPresetForDependency(&TestPreset{}, dep)
 
 	assert.Equal(t, []string{"ext-1", "ext-2", "preset-extension-for-some-url"}, sut.Extensions)
 	assert.Equal(t, []string{"preset-target-for-some-url", "target-1", "target-2"}, sut.Targets)

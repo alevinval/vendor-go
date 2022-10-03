@@ -66,9 +66,8 @@ func (f *Filters) ApplyPreset(preset Preset) *Filters {
 		ApplyFilters(preset.GetFilters())
 }
 
-// TODO: Rename method to something more describing
-// ApplyDep applies the filters of a Preset, and a Dependency.
-func (f *Filters) ApplyDep(preset Preset, dep *Dependency) *Filters {
+// ApplyPresetForDependency applies the filters of a Preset, and a Dependency.
+func (f *Filters) ApplyPresetForDependency(preset Preset, dep *Dependency) *Filters {
 	if preset.ForceFilters() {
 		f.Clear()
 	}
