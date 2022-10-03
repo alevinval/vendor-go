@@ -19,8 +19,11 @@ func newSelector(spec *vending.Spec, dep *vending.Dependency) *Selector {
 	}
 }
 
-func (sel *Selector) Select(path string) bool {
-	return sel.isTarget(path) && sel.hasExt(path) && !sel.isIgnored(path)
+func (sel *Selector) Select(path string) (isSelected, isTarget, isIgnored, hasExt bool) {
+	isIgnored = sel.isIgnored(path)
+	isTarget = sel.isTarget(path)
+	hasExt = sel.hasExt(path)
+	return isTarget && hasExt && !isIgnored, isTarget, isIgnored, hasExt
 }
 
 func (sel *Selector) isTarget(path string) bool {
