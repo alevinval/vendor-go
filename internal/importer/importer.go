@@ -57,7 +57,7 @@ func (imp *Importer) collect() (*targetCollector, error) {
 }
 
 func collectPathsFunc(srcRoot, dstRoot string, selector *Selector, collector *targetCollector) fs.WalkDirFunc {
-	return func(path string, _ os.DirEntry, err error) error {
+	return func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("path collection interrupted: %w", err)
 		}
@@ -67,7 +67,7 @@ func collectPathsFunc(srcRoot, dstRoot string, selector *Selector, collector *ta
 			return fmt.Errorf("cannot get relative path: %w", err)
 		}
 
-		if selector.Select(relativePath) {
+		if isSelected, isTarget, isIgnored, _ := selector.Select(relativePath); isSelected {
 			collector.add(
 				target{
 					srcRelative: relativePath,
@@ -75,6 +75,8 @@ func collectPathsFunc(srcRoot, dstRoot string, selector *Selector, collector *ta
 					dst:         filepath.Join(dstRoot, relativePath),
 				},
 			)
+		} else if entry.IsDir() && (!isTarget || isIgnored) {
+			return fs.SkipDir
 		}
 
 		return nil
