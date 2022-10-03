@@ -19,11 +19,15 @@ func newSelector(spec *vending.Spec, dep *vending.Dependency) *Selector {
 	}
 }
 
-func (sel *Selector) Select(path string) (isSelected, isTarget, isIgnored, hasExt bool) {
-	isIgnored = sel.isIgnored(path)
-	isTarget = sel.isTarget(path)
-	hasExt = sel.hasExt(path)
-	return isTarget && hasExt && !isIgnored, isTarget, isIgnored, hasExt
+func (sel *Selector) Select(path string) (isSelected, shouldEnterDir bool) {
+	isIgnored := sel.isIgnored(path)
+	isSelected = sel.isTarget(path) && sel.hasExt(path) && !isIgnored
+	shouldEnterDir = !isIgnored && sel.shouldEnterDir(path)
+	return
+}
+
+func (sel *Selector) shouldEnterDir(path string) bool {
+	return len(sel.filters.Targets) == 0 || inverseHasPrefix(sel.filters.Targets, path)
 }
 
 func (sel *Selector) isTarget(path string) bool {
@@ -54,6 +58,18 @@ func (sel *Selector) hasExt(path string) bool {
 
 func hasPrefix(path string, prefixes []string) bool {
 	for _, prefix := range prefixes {
+		if strings.HasPrefix(path, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func inverseHasPrefix(paths []string, prefix string) bool {
+	for _, path := range paths {
+		if len(prefix) > len(path) {
+			path, prefix = prefix, path
+		}
 		if strings.HasPrefix(path, prefix) {
 			return true
 		}
