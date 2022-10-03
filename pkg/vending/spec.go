@@ -11,7 +11,7 @@ import (
 )
 
 // VERSION of the current tool
-const VERSION = "v0.4.0"
+const VERSION = "v0.4.2"
 
 // Spec holds relevant information related to the specification of what
 // versions need to be fetched when updating dependencies.
