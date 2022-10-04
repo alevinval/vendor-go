@@ -31,13 +31,13 @@ func newDependencyInstaller(spec *vending.Spec, dep *vending.Dependency, depLock
 func (d *dependencyInstaller) Install() (*vending.DependencyLock, error) {
 	lock, err := d.repo.Lock()
 	if err != nil {
-		return nil, fmt.Errorf("cannot acquire repository lock: %w", err)
+		return nil, fmt.Errorf("cannot lock repository: %w", err)
 	}
 	defer lock.Release()
 
 	err = d.repo.OpenOrClone()
 	if err != nil {
-		return nil, fmt.Errorf("cannot ensure repository: %w", err)
+		return nil, fmt.Errorf("cannot open repository: %w", err)
 	}
 
 	if d.depLock == nil {
@@ -57,7 +57,7 @@ func (d *dependencyInstaller) Install() (*vending.DependencyLock, error) {
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("reset failed: %w", err)
+		return nil, fmt.Errorf("cannot reset repository: %w", err)
 	}
 	return d.importFiles()
 }
@@ -65,7 +65,7 @@ func (d *dependencyInstaller) Install() (*vending.DependencyLock, error) {
 func (d *dependencyInstaller) Update() (*vending.DependencyLock, error) {
 	lock, err := d.repo.Lock()
 	if err != nil {
-		return nil, fmt.Errorf("cannot acquire repository lock: %w", err)
+		return nil, fmt.Errorf("cannot lock repository: %w", err)
 	}
 	defer lock.Release()
 
@@ -81,12 +81,12 @@ func (d *dependencyInstaller) Update() (*vending.DependencyLock, error) {
 
 	err = d.repo.Fetch()
 	if err != nil {
-		return nil, fmt.Errorf("fetch failed: %w", err)
+		return nil, fmt.Errorf("cannot fetch repository: %w", err)
 	}
 
 	err = d.repo.Reset(d.dep.Branch)
 	if err != nil {
-		return nil, fmt.Errorf("reset failed: %w", err)
+		return nil, fmt.Errorf("cannot reset repository: %w", err)
 	}
 
 	return d.importFiles()

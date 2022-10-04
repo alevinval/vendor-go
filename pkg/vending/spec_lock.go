@@ -60,7 +60,7 @@ func (s *SpecLock) Load() error {
 
 	err = yaml.Unmarshal(data, s)
 	if err != nil {
-		return fmt.Errorf("cannot read: %w", err)
+		return fmt.Errorf("cannot unmarshal: %w", err)
 	}
 
 	s.applyPreset(preset)
@@ -73,12 +73,12 @@ func (s *SpecLock) Save() error {
 	filename := s.preset.GetSpecLockFilename()
 	data, err := toYaml(s)
 	if err != nil {
-		return fmt.Errorf("cannot save:  %w", err)
+		return fmt.Errorf("cannot convert to yaml:  %w", err)
 	}
 
 	err = os.WriteFile(filename, data, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("cannot save: %w", err)
+		return fmt.Errorf("cannot write file: %w", err)
 	}
 
 	return nil

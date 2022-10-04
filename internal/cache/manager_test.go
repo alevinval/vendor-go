@@ -23,7 +23,7 @@ func TestManager_Reset(t *testing.T) {
 	sut := NewManager(&TestPreset{})
 	sut.fs = fsMock
 
-	sut.Reset()
+	sut.Clean()
 
 	fsMock.AssertExpectations(t)
 }

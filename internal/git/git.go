@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/alevinval/vendor-go/pkg/log"
+	"github.com/fatih/color"
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
@@ -30,23 +31,21 @@ func (g Git) OpenOrClone(url, branch, path string) error {
 		return nil
 	}
 
-	err = g.Clone(url, branch, path)
-	if err != nil {
-		return fmt.Errorf("cannot clone: %w", err)
-	}
-
-	return nil
+	return g.Clone(url, branch, path)
 }
 
 func (g Git) Clone(url, branch, path string) error {
-	log.S().Infof("cloning %s...", url)
+	log.S().Infof(
+		"cloning %s...",
+		color.CyanString(url),
+	)
 	cloneOpts := &git.CloneOptions{
 		URL:           url,
 		ReferenceName: plumbing.NewBranchReferenceName(branch),
 	}
 	_, err := git.PlainClone(path, false, cloneOpts)
 	if err != nil {
-		return gitCloneErr(err)
+		return fmt.Errorf("cannot clone: %w", err)
 	}
 
 	return nil
@@ -70,7 +69,7 @@ func (g Git) Fetch(path string) error {
 		return nil
 	}
 
-	return fmt.Errorf("cannot fetch: %w", err)
+	return fmt.Errorf("cannot git fetch: %w", err)
 }
 
 func (g Git) Reset(path, refname string) error {
@@ -95,7 +94,7 @@ func (g Git) Reset(path, refname string) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("cannot resolve %q: %w", refname, err)
+		return fmt.Errorf("cannot resolve revision %q: %w", refname, err)
 	}
 
 	wt, err := repo.Worktree()
@@ -108,7 +107,7 @@ func (g Git) Reset(path, refname string) error {
 	}
 	err = wt.Clean(cleanOpts)
 	if err != nil {
-		return fmt.Errorf("cannot clean: %w", err)
+		return fmt.Errorf("cannot git clean: %w", err)
 	}
 
 	opts := &git.ResetOptions{
@@ -117,16 +116,12 @@ func (g Git) Reset(path, refname string) error {
 	}
 	err = wt.Reset(opts)
 	if err != nil {
-		return fmt.Errorf("cannot reset: %w", err)
+		return fmt.Errorf("cannot git reset: %w", err)
 	}
 
 	return nil
 }
 
 func gitOpenErr(err error) error {
-	return fmt.Errorf("cannot open repository: %w", err)
-}
-
-func gitCloneErr(err error) error {
-	return fmt.Errorf("cannot clone: %w", err)
+	return fmt.Errorf("cannot open: %w", err)
 }

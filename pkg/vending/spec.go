@@ -55,12 +55,12 @@ func (s *Spec) Load() error {
 	filename := preset.GetSpecFilename()
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return fmt.Errorf("cannot read: %w", err)
+		return fmt.Errorf("cannot read file: %w", err)
 	}
 
 	err = yaml.Unmarshal(data, s)
 	if err != nil {
-		return fmt.Errorf("cannot parse: %w", err)
+		return fmt.Errorf("cannot unmarshal: %w", err)
 	}
 
 	s.applyPreset(preset)
@@ -73,11 +73,11 @@ func (s *Spec) Save() error {
 	filename := s.preset.GetSpecFilename()
 	data, err := toYaml(s)
 	if err != nil {
-		return fmt.Errorf("cannot save: %w", err)
+		return fmt.Errorf("cannot convert to yaml: %w", err)
 	}
 	err = os.WriteFile(filename, data, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("cannot save: %w", err)
+		return fmt.Errorf("cannot write file: %w", err)
 	}
 	return nil
 }
