@@ -184,7 +184,7 @@ func TestSpec_SaveOutput(t *testing.T) {
 	err := sut.Save()
 	assert.NoError(t, err)
 
-	expected := `version: v0.4.3
+	expected := `version: v0.4.5
 preset: test-preset
 vendor_dir: test-vendor-dir
 extensions:
