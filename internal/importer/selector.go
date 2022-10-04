@@ -53,12 +53,24 @@ func (sel *Selector) hasExt(path string) bool {
 		}
 	}
 
-	return false
+	// Reaching this path means the file does not contain a supported extension
+	// Check for a perfect match between any of the targets, in which case we want
+	// to select the file anyway.
+	return hasPerfectMatch(path, sel.filters.Targets)
 }
 
 func hasPrefix(path string, prefixes []string) bool {
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(path, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasPerfectMatch(path string, prefixes []string) bool {
+	for _, prefix := range prefixes {
+		if path == prefix {
 			return true
 		}
 	}
