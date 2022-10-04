@@ -1,8 +1,11 @@
 version: v0.4.5
 preset: default
 vendor_dir: vendor/
-extensions:
-  - proto
 deps:
   - url: https://github.com/alevinval/ledger
     branch: master
+    extensions:
+      - proto
+    targets:
+      - README.md
+      - pkg/proto
