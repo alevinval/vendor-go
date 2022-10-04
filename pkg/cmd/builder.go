@@ -10,12 +10,12 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var isDebugEnabled bool
-
 // NewCobraCommand returns a configured cobra command that serves as entry point
 // to the vending CLI.
 func NewCobraCommand(opts ...Option) *cobra.Command {
-	b := &builder{}
+	b := &builder{
+		debugFlag: new(bool),
+	}
 	for _, opt := range opts {
 		opt(b)
 	}
@@ -25,11 +25,12 @@ func NewCobraCommand(opts ...Option) *cobra.Command {
 type builder struct {
 	preset      vending.Preset
 	commandName string
+	debugFlag   *bool
 }
 
 func (b *builder) buildCobra() *cobra.Command {
-	rootCmd := newRootCmd(b.commandName)
-	rootCmd.PersistentFlags().BoolVarP(&isDebugEnabled, "debug", "d", false, "enable debug logging")
+	rootCmd := newRootCmd(b.commandName, b.debugFlag)
+	rootCmd.PersistentFlags().BoolVarP(b.debugFlag, "debug", "d", false, "enable debug logging")
 
 	controller := control.New(
 		control.WithPreset(b.preset),
@@ -43,12 +44,12 @@ func (b *builder) buildCobra() *cobra.Command {
 	return rootCmd
 }
 
-func newRootCmd(commandName string) *cobra.Command {
+func newRootCmd(commandName string, debugFlag *bool) *cobra.Command {
 	return &cobra.Command{
 		Use:   commandName,
 		Short: fmt.Sprintf("%s is a flexible and customizable vending tool (%s)", commandName, vending.VERSION),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			if isDebugEnabled {
+			if *debugFlag {
 				log.Level.SetLevel(zapcore.DebugLevel)
 			}
 		},
