@@ -61,7 +61,8 @@ func (imp *Importer) collect() (*targetCollector, error) {
 func collectPathsFunc(srcRoot, dstRoot string, selector *Selector, collector *targetCollector) fs.WalkDirFunc {
 	return func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
-			return fmt.Errorf("path collection interrupted: %w", err)
+			log.S().Warnf("skipping directory %s due to path error: %w", path, err)
+			return nil
 		}
 
 		if strings.EqualFold(srcRoot, path) {
