@@ -31,7 +31,7 @@ type Preset interface {
 	// GetFiltersForDependency returns the specific filters for a dependency
 	GetFiltersForDependency(*Dependency) *Filters
 
-	// ForceFilters flag returns wether the preset will force the overriding of
+	// ForceFilters flag returns whether the preset will force the overriding of
 	// the spec or dependency filters to the preset ones
 	ForceFilters() bool
 

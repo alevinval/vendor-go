@@ -73,22 +73,22 @@ func collectTargetsFunc(
 			return nil
 		}
 
-		relativePath, err := filepath.Rel(srcRoot, path)
+		pathRel, err := filepath.Rel(srcRoot, path)
 		if err != nil {
 			return fmt.Errorf("cannot get relative path: %w", err)
 		}
 
-		if isSelected, shouldEnterDir := selector.Select(relativePath); isSelected {
+		if entry.IsDir() && !selector.SelectDir(pathRel) {
+			log.S().Debugf("  [skip] %s", pathRel)
+			return fs.SkipDir
+		} else if selector.SelectPath(pathRel) {
 			collector.add(
 				target{
-					srcRelative: relativePath,
-					src:         path,
-					dst:         filepath.Join(dstRoot, relativePath),
+					src:    path,
+					srcRel: pathRel,
+					dst:    filepath.Join(dstRoot, pathRel),
 				},
 			)
-		} else if entry.IsDir() && !shouldEnterDir {
-			log.S().Debugf("  [skip] %s", relativePath)
-			return fs.SkipDir
 		}
 
 		return nil

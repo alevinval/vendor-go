@@ -19,15 +19,15 @@ func newSelector(spec *vending.Spec, dep *vending.Dependency) *Selector {
 	}
 }
 
-func (sel *Selector) Select(path string) (isSelected, shouldEnterDir bool) {
-	isIgnored := sel.isIgnored(path)
-	isSelected = sel.isTarget(path) && sel.hasExt(path) && !isIgnored
-	shouldEnterDir = !isIgnored && sel.shouldEnterDir(path)
-	return
+// SelectPath determines if a filepath should be selected or not.
+func (sel *Selector) SelectPath(path string) bool {
+	return sel.isTarget(path) && sel.hasExt(path) && !sel.isIgnored(path)
 }
 
-func (sel *Selector) shouldEnterDir(path string) bool {
-	return len(sel.filters.Targets) == 0 || inverseHasPrefix(sel.filters.Targets, path)
+// SelectDir determines if a directory should be walked or not.
+func (sel *Selector) SelectDir(dir string) bool {
+	return !sel.isIgnored(dir) && (len(sel.filters.Targets) == 0 ||
+		inverseHasPrefix(sel.filters.Targets, dir))
 }
 
 func (sel *Selector) isTarget(path string) bool {
@@ -65,6 +65,8 @@ func hasPrefix(path string, prefixes []string) bool {
 	return false
 }
 
+// inverseHasPrefix is used to determine when the WalkDirFunc should enter inside
+// a directory whenever a path has not been selected.
 func inverseHasPrefix(paths []string, prefix string) bool {
 	prefix = normDir(prefix)
 	for _, path := range paths {

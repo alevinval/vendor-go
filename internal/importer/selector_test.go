@@ -34,12 +34,14 @@ func TestSelectorSelect_WithTargets(t *testing.T) {
 		filters: filtersWithTargets,
 	}
 
+	// Filepaths
 	assertSelection(t, sut, "target/a/some-file.proto", true, true)
 	assertSelection(t, sut, "target/a/ignored/ignored.proto", false, false)
 	assertSelection(t, sut, "ignored/a/ignored.proto", false, false)
 	assertSelection(t, sut, "target/a/readme.md", false, true)
 	assertSelection(t, sut, "target/a/no-extension", false, true)
 
+	// Dirs
 	assertSelection(t, sut, "nontarget/a/b", false, false)
 	assertSelection(t, sut, "ignored/a/b", false, false)
 	assertSelection(t, sut, "target", false, true)
@@ -54,12 +56,14 @@ func TestSelectorSelect_WithoutTargets(t *testing.T) {
 		filters: filtersWithoutTargets,
 	}
 
+	// Filepaths
 	assertSelection(t, sut, "target/a/some-file.proto", true, true)
 	assertSelection(t, sut, "target/a/ignored/ignored.proto", false, false)
 	assertSelection(t, sut, "ignored/a/ignored.proto", false, false)
 	assertSelection(t, sut, "target/a/readme.md", false, true)
 	assertSelection(t, sut, "target/a/no-extension", false, true)
 
+	// Dirs
 	assertSelection(t, sut, "nontarget/a/b", false, true)
 	assertSelection(t, sut, "ignored/a/b", false, false)
 }
@@ -68,7 +72,8 @@ func assertSelection(
 	t *testing.T, sut Selector, path string,
 	expectedIsSelected, expectedShouldEnterDir bool,
 ) {
-	isSelected, shouldEnterDir := sut.Select(path)
+	isSelected := sut.SelectPath(path)
+	shouldEnterDir := sut.SelectDir(path)
 
 	assert.Equal(t, expectedIsSelected, isSelected, "isSelected missmatch")
 	assert.Equal(t, expectedShouldEnterDir, shouldEnterDir, "shouldEnterDir missmatch")

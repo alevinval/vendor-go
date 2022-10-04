@@ -14,9 +14,9 @@ type targetCollector struct {
 }
 
 type target struct {
-	src         string
-	dst         string
-	srcRelative string
+	src    string
+	srcRel string
+	dst    string
 }
 
 func (tc *targetCollector) add(t target) {
@@ -34,7 +34,7 @@ func (tc *targetCollector) copyAll() error {
 }
 
 func (t *target) copy() error {
-	log.S().Debugf("  [copy] ../%s -> %s", t.srcRelative, t.dst)
+	log.S().Debugf("  [copy] ../%s -> %s", t.srcRel, t.dst)
 
 	dstDir := filepath.Dir(t.dst)
 	err := os.MkdirAll(dstDir, os.ModePerm)

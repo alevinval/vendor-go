@@ -5,7 +5,7 @@ import (
 )
 
 // Filters is a collection type. When vendoring dependencies we look if the
-// file paths are copied or ignored, or wether the extension is supported.
+// file paths are copied or ignored, or whether the extension is supported.
 // Filters are directly serialized into the output YAML.
 //
 // Filters supposed to make life easier proving a builder pattern so it's
