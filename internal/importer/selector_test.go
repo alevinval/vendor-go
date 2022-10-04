@@ -27,7 +27,7 @@ func TestSelector(t *testing.T) {
 func TestSelectorSelect_WithTargets(t *testing.T) {
 	filtersWithTargets := vending.NewFilters().
 		AddExtension("proto").
-		AddTarget("target/a").
+		AddTarget("target/a", "readme.md").
 		AddIgnore("ignored/a", "target/a/ignored")
 
 	sut := Selector{
@@ -40,6 +40,7 @@ func TestSelectorSelect_WithTargets(t *testing.T) {
 	assertSelection(t, sut, "ignored/a/ignored.proto", false, false)
 	assertSelection(t, sut, "target/a/readme.md", false, true)
 	assertSelection(t, sut, "target/a/no-extension", false, true)
+	assertSelection(t, sut, "readme.md", true, false)
 
 	// Dirs
 	assertSelection(t, sut, "nontarget/a/b", false, false)
