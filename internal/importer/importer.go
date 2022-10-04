@@ -33,11 +33,11 @@ func New(repo *git.Repository, spec *vending.Spec, dep *vending.Dependency) *Imp
 func (imp *Importer) Import() error {
 	collector, err := imp.collect()
 	if err != nil {
-		return fmt.Errorf("cannot import: %w", err)
+		return fmt.Errorf("cannot collect: %w", err)
 	}
 	err = collector.copyAll()
 	if err != nil {
-		return fmt.Errorf("cannot import: %w", err)
+		return fmt.Errorf("cannot copyAll: %w", err)
 	}
 	return nil
 }
@@ -47,7 +47,7 @@ func (imp *Importer) collect() (*targetCollector, error) {
 	targetCollector := &targetCollector{targets: []target{}}
 
 	err := imp.repo.WalkDir(
-		collectPathsFunc(
+		collectTargetsFunc(
 			imp.repo.Path(),
 			imp.spec.VendorDir,
 			selector,
@@ -58,7 +58,11 @@ func (imp *Importer) collect() (*targetCollector, error) {
 	return targetCollector, err
 }
 
-func collectPathsFunc(srcRoot, dstRoot string, selector *Selector, collector *targetCollector) fs.WalkDirFunc {
+func collectTargetsFunc(
+	srcRoot, dstRoot string,
+	selector *Selector,
+	collector *targetCollector,
+) fs.WalkDirFunc {
 	return func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			log.S().Warnf("skipping directory %s due to path error: %w", path, err)
