@@ -154,7 +154,7 @@ func (c *Controller) Update() error {
 }
 
 // AddDependency adds a new dependency into the spec file.
-func (c *Controller) AddDependency(url, branch string) error {
+func (c *Controller) AddDependency(url, branch string, filters *vending.Filters) error {
 	spec := vending.NewSpec(c.preset)
 	err := spec.Load()
 	if err != nil {
@@ -162,6 +162,8 @@ func (c *Controller) AddDependency(url, branch string) error {
 	}
 
 	dep := vending.NewDependency(url, branch)
+	dep.Filters.ApplyFilters(filters)
+
 	spec.AddDependency(dep)
 
 	err = spec.Save()

@@ -29,13 +29,11 @@ type builder struct {
 }
 
 func (b *builder) buildCobra() *cobra.Command {
-	rootCmd := newRootCmd(b.commandName, b.debugFlag)
-	rootCmd.PersistentFlags().BoolVarP(b.debugFlag, "debug", "d", false, "enable debug logging")
-
 	controller := control.New(
 		control.WithPreset(b.preset),
 	)
 
+	rootCmd := newRootCmd(b.commandName, b.debugFlag)
 	rootCmd.AddCommand(newInitCmd(controller))
 	rootCmd.AddCommand(newAddCmd(controller))
 	rootCmd.AddCommand(newInstallCmd(controller))
@@ -45,7 +43,7 @@ func (b *builder) buildCobra() *cobra.Command {
 }
 
 func newRootCmd(commandName string, debugFlag *bool) *cobra.Command {
-	return &cobra.Command{
+	rootCmd := &cobra.Command{
 		Use:   commandName,
 		Short: fmt.Sprintf("%s is a flexible and customizable vending tool (%s)", commandName, vending.VERSION),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
@@ -54,6 +52,8 @@ func newRootCmd(commandName string, debugFlag *bool) *cobra.Command {
 			}
 		},
 	}
+	rootCmd.PersistentFlags().BoolVarP(debugFlag, "debug", "d", false, "enable debug logging")
+	return rootCmd
 }
 
 func newInitCmd(controller *control.Controller) *cobra.Command {
@@ -70,19 +70,36 @@ func newInitCmd(controller *control.Controller) *cobra.Command {
 }
 
 func newAddCmd(controller *control.Controller) *cobra.Command {
-	return &cobra.Command{
+	targets := []string{}
+	ignores := []string{}
+	extensions := []string{}
+
+	addCmd := &cobra.Command{
 		Use:   "add [url] [branch]",
 		Short: "Add a new dependency to the spec",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			url := args[0]
 			branch := args[1]
-			err := controller.AddDependency(url, branch)
+
+			filters := vending.NewFilters().
+				AddTarget(targets...).
+				AddIgnore(ignores...).
+				AddExtension(extensions...)
+
+			err := controller.AddDependency(url, branch, filters)
+
 			if err != nil {
 				log.S().Errorf("%s", err)
 			}
 		},
 	}
+
+	addCmd.PersistentFlags().StringArrayVarP(&targets, "targets", "t", []string{}, "targeted paths")
+	addCmd.PersistentFlags().StringArrayVarP(&ignores, "ignores", "i", []string{}, "ignored paths")
+	addCmd.PersistentFlags().StringArrayVarP(&extensions, "ext", "e", []string{}, "targeted file extensions paths")
+
+	return addCmd
 }
 
 func newInstallCmd(controller *control.Controller) *cobra.Command {
