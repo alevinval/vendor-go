@@ -27,7 +27,7 @@ func (tc *targetCollector) copyAll() error {
 	for _, target := range tc.targets {
 		err := target.copy()
 		if err != nil {
-			return fmt.Errorf("cannot copy target: %w", err)
+			return fmt.Errorf("cannot copy: %w", err)
 		}
 	}
 	return nil
@@ -39,11 +39,11 @@ func (t *target) copy() error {
 	dstDir := filepath.Dir(t.dst)
 	err := os.MkdirAll(dstDir, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("cannot create target path %q: %w", dstDir, err)
+		return fmt.Errorf("cannot create dstDir %q: %w", dstDir, err)
 	}
 	err = copyFile(t.src, t.dst)
 	if err != nil {
-		return fmt.Errorf("cannot copy file: %w", err)
+		return fmt.Errorf("cannot copyFile: %w", err)
 	}
 	return nil
 }

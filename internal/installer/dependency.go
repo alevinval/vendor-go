@@ -95,7 +95,7 @@ func (d *dependencyInstaller) Update() (*vending.DependencyLock, error) {
 func (d *dependencyInstaller) importFiles() (*vending.DependencyLock, error) {
 	err := d.imp.Import()
 	if err != nil {
-		return nil, fmt.Errorf("cannot import files: %w", err)
+		return nil, fmt.Errorf("cannot import: %w", err)
 	}
 
 	commit, err := d.repo.GetCurrentCommit()
