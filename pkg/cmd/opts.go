@@ -22,3 +22,12 @@ func WithPreset(preset vending.Preset) Option {
 		},
 	)
 }
+
+// WithDebugFlag is used to customize the debug flag variable.
+func WithDebugFlag(debugFlag *bool) Option {
+	return Option(
+		func(b *builder) {
+			b.debugFlag = debugFlag
+		},
+	)
+}
