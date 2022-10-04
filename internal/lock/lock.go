@@ -23,8 +23,8 @@ func New(path string) *Lock {
 }
 
 func (l *Lock) Acquire() (err error) {
-	ch := createLock(l.path)
-	l.file, err = l.doPoll(ch)
+	ch, errCh := createLock(l.path)
+	l.file, err = l.doPoll(ch, errCh)
 	return
 }
 
@@ -42,7 +42,10 @@ func (l *Lock) WithPeriod(period time.Duration) *Lock {
 	return l
 }
 
-func (l *Lock) doPoll(ch <-chan *lockedfile.File) (*lockedfile.File, error) {
+func (l *Lock) doPoll(
+	ch <-chan *lockedfile.File,
+	errCh <-chan error,
+) (*lockedfile.File, error) {
 	warn := l.warn != ""
 	for {
 		select {
@@ -55,21 +58,23 @@ func (l *Lock) doPoll(ch <-chan *lockedfile.File) (*lockedfile.File, error) {
 			if ok {
 				return lock, nil
 			} else {
-				return nil, fmt.Errorf("cannot acquire lock")
+				return nil, fmt.Errorf("cannot create lock: %w", <-errCh)
 			}
 		}
 	}
 }
 
-func createLock(path string) <-chan *lockedfile.File {
+func createLock(path string) (<-chan *lockedfile.File, <-chan error) {
 	ch := make(chan *lockedfile.File)
+	errCh := make(chan error)
 	go func() {
 		lock, err := lockedfile.Create(path)
 		if err != nil {
 			close(ch)
+			errCh <- err
 			return
 		}
 		ch <- lock
 	}()
-	return ch
+	return ch, errCh
 }

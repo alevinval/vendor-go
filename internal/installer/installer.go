@@ -34,7 +34,10 @@ func (in *Installer) Update() error {
 }
 
 func (in *Installer) runInParallel(action actionFunc) error {
-	resetVendorDir(in.spec.VendorDir)
+	err := resetVendorDir(in.spec.VendorDir)
+	if err != nil {
+		return err
+	}
 
 	n := len(in.spec.Deps)
 	out := make(chan *vending.DependencyLock, n)
@@ -96,9 +99,16 @@ func (in *Installer) runInBackground(wg *sync.WaitGroup, action actionFunc, dep 
 	return nil
 }
 
-func resetVendorDir(vendorDir string) {
-	os.RemoveAll(vendorDir)
-	os.MkdirAll(vendorDir, os.ModePerm)
+func resetVendorDir(vendorDir string) error {
+	err := os.RemoveAll(vendorDir)
+	if err != nil {
+		return fmt.Errorf("cannot remove vendor dir: %w", err)
+	}
+	err = os.MkdirAll(vendorDir, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("cannot create vendor dir: %w", err)
+	}
+	return nil
 }
 
 type actionFunc = func(*dependencyInstaller) (*vending.DependencyLock, error)

@@ -10,6 +10,7 @@ import (
 	"github.com/alevinval/vendor-go/internal/git"
 	"github.com/alevinval/vendor-go/internal/lock"
 	"github.com/alevinval/vendor-go/pkg/vending"
+	"github.com/fatih/color"
 )
 
 const (
@@ -42,22 +43,22 @@ func (man *Manager) Ensure() error {
 	locksDir := path.Join(cacheDir, LOCKS_DIR)
 	err := man.fs.MkdirAll(locksDir, os.ModePerm)
 	if err != nil {
-		return ensureCacheErr(err)
+		return fmt.Errorf("cannot create locks directory: %w", err)
 	}
 
 	reposDir := path.Join(cacheDir, REPOS_DIR)
 	err = man.fs.MkdirAll(reposDir, os.ModePerm)
 	if err != nil {
-		return ensureCacheErr(err)
+		return fmt.Errorf("cannot create repositories directory: %w", err)
 	}
 
 	return nil
 }
 
-func (man *Manager) Reset() error {
+func (man *Manager) Clean() error {
 	err := man.fs.RemoveAll(man.preset.GetCacheDir())
 	if err != nil {
-		return fmt.Errorf("cannot remove cache: %w", err)
+		return fmt.Errorf("cannot remove cache directory: %w", err)
 	}
 	return man.Ensure()
 }
@@ -65,15 +66,18 @@ func (man *Manager) Reset() error {
 func (man *Manager) LockCache() (*lock.Lock, error) {
 	err := man.Ensure()
 	if err != nil {
-		return nil, fmt.Errorf("cannot lock cache: %w", err)
+		return nil, fmt.Errorf("cannot ensure paths: %w", err)
 	}
 
 	lockPath := man.getCacheLockPath()
-	lock := lock.New(lockPath).
-		WithWarn("cannot acquire cache lock, are you running multiple instances in parallel?")
+	lock := lock.New(lockPath).WithWarn(
+		color.RedString(
+			"cannot acquire cache lock, are you running multiple instances in parallel?",
+		),
+	)
 	err = lock.Acquire()
 	if err != nil {
-		return nil, fmt.Errorf("cannot acquire cache lock %q: %w", lockPath, err)
+		return nil, fmt.Errorf("cannot acquire lock %q: %w", lockPath, err)
 	}
 	return lock, nil
 }
@@ -81,7 +85,7 @@ func (man *Manager) LockCache() (*lock.Lock, error) {
 func (man *Manager) GetRepository(dep *vending.Dependency) (*git.Repository, error) {
 	lock, err := man.getRepositoryLock(dep)
 	if err != nil {
-		return nil, fmt.Errorf("cannot get repository: %w", err)
+		return nil, fmt.Errorf("cannot get repository lock: %w", err)
 	}
 	return git.NewRepository(
 		man.getRepositoryPath(dep),
@@ -93,13 +97,13 @@ func (man *Manager) GetRepository(dep *vending.Dependency) (*git.Repository, err
 func (man *Manager) getRepositoryLock(dep *vending.Dependency) (*lock.Lock, error) {
 	err := man.Ensure()
 	if err != nil {
-		return nil, fmt.Errorf("cannot lock repository: %w", err)
+		return nil, fmt.Errorf("cannot ensure paths: %w", err)
 	}
 
 	lockPath := man.getRepositoryLockPath(dep)
 	lock := lock.New(lockPath)
 	if err != nil {
-		return nil, fmt.Errorf("cannot acquire repository lock %q: %w", lockPath, err)
+		return nil, fmt.Errorf("cannot acquire lock %q: %w", lockPath, err)
 	}
 
 	return lock, nil
@@ -126,10 +130,6 @@ func (man *Manager) getRepositoryPath(dep *vending.Dependency) string {
 		REPOS_DIR,
 		getDependencyID(dep),
 	)
-}
-
-func ensureCacheErr(err error) error {
-	return fmt.Errorf("cannot bootstrap cache: %w", err)
 }
 
 func getDependencyID(dep *vending.Dependency) string {
