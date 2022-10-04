@@ -11,7 +11,9 @@ This tool allows users to install, manage and update dependencies. See the
 * Highly customizable tool: develop your custom presets, adapt, and standardize the
   vendoring process to your needs.
 
-* Parallelized vendoring process
+* Parallelized vendoring process: dependencies are vendored in parallel during install
+  or update operations, this further enhances speed due to the I/O required to clone or
+  fetch the upstreams.
 
 ## Usage
 
