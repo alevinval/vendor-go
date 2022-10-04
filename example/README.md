@@ -9,7 +9,7 @@ vending init
 ```
 
 ```
-vending add https://github.com/alevinval/ledger master
+vending add https://github.com/alevinval/ledger master -t pkg/proto -t README.md -e proto
 
 added dependency https://github.com/alevinval/ledger@master
 ```
