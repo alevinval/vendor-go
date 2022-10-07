@@ -40,24 +40,36 @@ func (d *dependencyInstaller) Install() (*vending.DependencyLock, error) {
 		return nil, fmt.Errorf("cannot open repository: %w", err)
 	}
 
+	var refname, refnameLog string
 	if d.depLock == nil {
-		log.S().Infof("installing %s@%s",
-			color.CyanString(d.dep.URL),
-			color.YellowString(d.dep.Branch),
-		)
-		err = d.repo.Reset(d.dep.Branch)
+		refname = d.dep.Branch
+		refnameLog = refname
 	} else {
-		log.S().Infof("installing %s@%s",
-			color.CyanString(d.dep.URL),
-			color.YellowString(
-				fmt.Sprintf("%.8s", d.depLock.Commit),
-			),
-		)
-		err = d.repo.Reset(d.depLock.Commit)
+		refname = d.depLock.Commit
+		refnameLog = fmt.Sprintf("%.8s", d.depLock.Commit)
 	}
 
-	if err != nil {
-		return nil, fmt.Errorf("cannot reset repository: %w", err)
+	doReset := func(fetch bool) error {
+		if fetch {
+			err = d.repo.Fetch()
+			if err != nil {
+				return fmt.Errorf("cannot fetch repository: %w", err)
+			}
+		} else {
+			log.S().Infof("installing %s@%s",
+				color.CyanString(d.dep.URL),
+				color.YellowString(
+					refnameLog,
+				),
+			)
+		}
+		return d.repo.Reset(refname)
+	}
+
+	if err = doReset(false); err != nil {
+		if err = doReset(true); err != nil {
+			return nil, fmt.Errorf("cannot reset repository: %w", err)
+		}
 	}
 	return d.importFiles()
 }
