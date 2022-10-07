@@ -46,7 +46,7 @@ func (in *Installer) runInParallel(action actionFunc) error {
 	wg.Add(n)
 
 	for _, dep := range in.spec.Deps {
-		go in.runInBackground(wg, action, dep, out)
+		go in.runInBackground(wg, action, dep, out, errors)
 	}
 
 	completed := make(chan struct{}, 1)
@@ -80,10 +80,19 @@ func (in *Installer) runInParallel(action actionFunc) error {
 	return nil
 }
 
-func (in *Installer) runInBackground(wg *sync.WaitGroup, action actionFunc, dep *vending.Dependency, out chan *vending.DependencyLock) error {
+func (in *Installer) runInBackground(
+	wg *sync.WaitGroup,
+	action actionFunc,
+	dep *vending.Dependency,
+	out chan *vending.DependencyLock,
+	errors chan error,
+) {
+	defer wg.Done()
+
 	repo, err := in.cacheManager.GetRepository(dep)
 	if err != nil {
-		return fmt.Errorf("cannot complete action: %w", err)
+		errors <- fmt.Errorf("cannot complete action: %w", err)
+		return
 	}
 
 	lock, _ := in.specLock.FindByURL(dep.URL)
@@ -91,12 +100,12 @@ func (in *Installer) runInBackground(wg *sync.WaitGroup, action actionFunc, dep 
 
 	dependencyLock, err := action(dependencyInstaller)
 	if err != nil {
-		return fmt.Errorf("cannot complete action: %w", err)
+		errors <- fmt.Errorf("cannot complete action: %w", err)
+		return
 	}
 
 	out <- dependencyLock
-	wg.Done()
-	return nil
+	return
 }
 
 func resetVendorDir(vendorDir string) error {
