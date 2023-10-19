@@ -84,7 +84,9 @@ func (s *Spec) Save() error {
 
 func (s *Spec) applyPreset(preset Preset) {
 	s.preset = preset
-	s.VendorDir = preset.GetVendorDir()
+	if s.VendorDir == "" {
+		s.VendorDir = preset.GetVendorDir()
+	}
 	s.PresetName = preset.GetPresetName()
 
 	if s.Version < VERSION {
