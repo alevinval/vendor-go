@@ -71,7 +71,7 @@ func TestSpecLock_SaveOutput(t *testing.T) {
 	err := sut.Save()
 	assert.NoError(t, err)
 
-	expected := `version: v0.4.6
+	expected := `version: v0.4.7
 deps:
   - url: some-url
     commit: some-commit
