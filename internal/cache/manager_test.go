@@ -63,7 +63,7 @@ func TestManager_GetRepositoryPath(t *testing.T) {
 	actual := sut.getRepositoryPath(dep)
 
 	assert.Equal(t,
-		".test-cache-dir/repos/736f6d652d75726ce3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+		".test-cache-dir/repos/f28318b204791d282d65cc09bba5389e8b9c7406",
 		actual,
 	)
 }
@@ -75,7 +75,7 @@ func TestManager_GetRepositoryLockPath(t *testing.T) {
 	actual := sut.getRepositoryLockPath(dep)
 
 	assert.Equal(t,
-		".test-cache-dir/locks/736f6d652d75726ce3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+		".test-cache-dir/locks/f28318b204791d282d65cc09bba5389e8b9c7406",
 		actual,
 	)
 }
