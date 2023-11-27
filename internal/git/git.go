@@ -110,13 +110,13 @@ func (g Git) Reset(path, refname string) error {
 		return fmt.Errorf("cannot git clean: %w", err)
 	}
 
-	opts := &git.ResetOptions{
-		Commit: *hash,
-		Mode:   git.HardReset,
+	opts := &git.CheckoutOptions{
+		Hash:  *hash,
+		Force: true,
 	}
-	err = wt.Reset(opts)
+	err = wt.Checkout(opts)
 	if err != nil {
-		return fmt.Errorf("cannot git reset: %w", err)
+		return fmt.Errorf("cannot git checkout: %w", err)
 	}
 
 	return nil
