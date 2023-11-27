@@ -184,7 +184,7 @@ func TestSpec_SaveOutput(t *testing.T) {
 	err := sut.Save()
 	assert.NoError(t, err)
 
-	expected := `version: v0.4.7
+	expected := fmt.Sprintf(`version: %s
 preset: test-preset
 vendor_dir: test-vendor-dir
 extensions:
@@ -202,7 +202,7 @@ deps:
       - preset-target-for-some-url
     ignores:
       - preset-ignore-for-some-url
-`
+`, VERSION)
 
 	actual, err := os.ReadFile("some-spec-filename")
 	assert.NoError(t, err)

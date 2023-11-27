@@ -1,6 +1,7 @@
 package vending
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -71,11 +72,11 @@ func TestSpecLock_SaveOutput(t *testing.T) {
 	err := sut.Save()
 	assert.NoError(t, err)
 
-	expected := `version: v0.4.7
+	expected := fmt.Sprintf(`version: %s
 deps:
   - url: some-url
     commit: some-commit
-`
+`, VERSION)
 
 	actual, err := os.ReadFile(testPreset.GetSpecLockFilename())
 	assert.NoError(t, err)
