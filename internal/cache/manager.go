@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"crypto/sha256"
+	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"os"
@@ -133,8 +133,9 @@ func (man *Manager) getRepositoryPath(dep *vending.Dependency) string {
 }
 
 func getDependencyID(dep *vending.Dependency) string {
-	sha := sha256.New()
-	data := sha.Sum([]byte(dep.URL))
+	sha := sha1.New()
+	sha.Write([]byte(dep.URL))
+	data := sha.Sum(nil)
 	return hex.EncodeToString(data)
 }
 
