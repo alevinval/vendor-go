@@ -78,5 +78,5 @@ func (dp *DefaultPreset) GetCacheDir() string {
 		log.S().Warnf("Cannot find user home directory, using tempdir as home")
 		homeDir = os.TempDir()
 	}
-	return path.Join(homeDir, ".vending-cache")
+	return path.Join(homeDir, ".cache", "vending")
 }

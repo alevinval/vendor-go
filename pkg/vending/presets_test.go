@@ -23,7 +23,7 @@ func TestDefaultPreset_GetCacheDir_UsesHome(t *testing.T) {
 
 	sut := DefaultPreset{}
 
-	assert.Equal(t, "some-home-path/.vending-cache", sut.GetCacheDir())
+	assert.Equal(t, "some-home-path/.cache/vending", sut.GetCacheDir())
 }
 
 func TestDefaultPreset_GetCacheDir_DefaultsToTempDir(t *testing.T) {
@@ -31,5 +31,5 @@ func TestDefaultPreset_GetCacheDir_DefaultsToTempDir(t *testing.T) {
 
 	sut := DefaultPreset{}
 
-	assert.Equal(t, "/tmp/.vending-cache", sut.GetCacheDir())
+	assert.Equal(t, "/tmp/.cache/vending", sut.GetCacheDir())
 }
