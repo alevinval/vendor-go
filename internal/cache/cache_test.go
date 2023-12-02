@@ -10,55 +10,68 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var _ CacheFS = (*fsMock)(nil)
-var _ vending.Preset = (*TestPreset)(nil)
+const testCachePath = ".test-cache-dir"
 
-func TestManager_Reset(t *testing.T) {
+var _ fsOps = (*fsMock)(nil)
+
+func TestCache_Reset(t *testing.T) {
 	fsMock := &fsMock{}
 	fsMock.
 		On("RemoveAll", ".test-cache-dir").Return(nil).
 		On("MkdirAll", ".test-cache-dir/locks", os.ModePerm).Return(nil).
 		On("MkdirAll", ".test-cache-dir/repos", os.ModePerm).Return(nil)
 
-	sut := NewManager(&TestPreset{})
+	sut := New(testCachePath)
 	sut.fs = fsMock
 
-	sut.Clean()
+	sut.Reset()
 
 	fsMock.AssertExpectations(t)
 }
 
-func TestManager_Ensure(t *testing.T) {
+func TestCache_Init(t *testing.T) {
 	fsMock := &fsMock{}
 	fsMock.
 		On("MkdirAll", ".test-cache-dir/locks", os.ModePerm).Return(nil).
 		On("MkdirAll", ".test-cache-dir/repos", os.ModePerm).Return(nil)
 
-	sut := NewManager(&TestPreset{})
+	sut := New(testCachePath)
 	sut.fs = fsMock
 
-	sut.Ensure()
+	sut.Init()
 
 	fsMock.AssertExpectations(t)
 }
 
-func TestManager_LockCache(t *testing.T) {
-	preset := &TestPreset{}
+func TestCache_Clean(t *testing.T) {
+	fsMock := &fsMock{}
+	fsMock.
+		On("RemoveAll", testCachePath).Return(nil).
+		On("MkdirAll", ".test-cache-dir/locks", os.ModePerm).Return(nil).
+		On("MkdirAll", ".test-cache-dir/repos", os.ModePerm).Return(nil)
+
+	sut := New(testCachePath)
+	sut.fs = fsMock
+
+	sut.Reset()
+}
+
+func TestCache_Lock(t *testing.T) {
 	defer func() {
-		os.RemoveAll(preset.GetCacheDir())
+		os.RemoveAll(testCachePath)
 	}()
 
-	sut := NewManager(&TestPreset{})
+	sut := New(testCachePath)
 
-	lock, err := sut.LockCache()
+	lock, err := sut.Lock()
 
 	assert.NoError(t, err)
 	assert.NotNil(t, lock)
 }
 
-func TestManager_GetRepositoryPath(t *testing.T) {
+func TestCache_GetRepositoryPath(t *testing.T) {
 	dep := vending.NewDependency("some-url", "some-branch")
-	sut := NewManager(&TestPreset{})
+	sut := New(testCachePath)
 
 	actual := sut.getRepositoryPath(dep)
 
@@ -68,9 +81,9 @@ func TestManager_GetRepositoryPath(t *testing.T) {
 	)
 }
 
-func TestManager_GetRepositoryLockPath(t *testing.T) {
+func TestCache_GetRepositoryLockPath(t *testing.T) {
 	dep := vending.NewDependency("some-url", "some-branch")
-	sut := NewManager(&TestPreset{})
+	sut := New(testCachePath)
 
 	actual := sut.getRepositoryLockPath(dep)
 
@@ -78,14 +91,6 @@ func TestManager_GetRepositoryLockPath(t *testing.T) {
 		".test-cache-dir/locks/f28318b204791d282d65cc09bba5389e8b9c7406",
 		actual,
 	)
-}
-
-type TestPreset struct {
-	vending.DefaultPreset
-}
-
-func (tp *TestPreset) GetCacheDir() string {
-	return ".test-cache-dir"
 }
 
 type fsMock struct {

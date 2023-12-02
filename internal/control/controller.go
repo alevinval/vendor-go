@@ -22,8 +22,8 @@ func WithPreset(preset vending.Preset) Option {
 
 // Controller knows how to execute the main business logic of the tool.
 type Controller struct {
-	preset       vending.Preset
-	cacheManager *cache.Manager
+	preset vending.Preset
+	cache  *cache.Cache
 }
 
 // New allocates a command controller based on the provided options.
@@ -39,7 +39,7 @@ func New(opts ...Option) *Controller {
 		opt(c)
 	}
 
-	c.cacheManager = cache.NewManager(c.preset)
+	c.cache = cache.New(c.preset.GetCacheDir())
 
 	return c
 }
@@ -67,21 +67,19 @@ func (c *Controller) Init() error {
 // When no lockfile is present, it locks the dependencies at the latest
 // reference of the branch that the spec defines for each dependency.
 func (c *Controller) Install() error {
-	lock, err := c.cacheManager.LockCache()
+	lock, err := c.cache.Lock()
 	if err != nil {
 		return fmt.Errorf("cannot lock cache: %w", err)
 	}
 	defer lock.Release()
 
 	spec := vending.NewSpec(c.preset)
-	err = spec.Load()
-	if err != nil {
+	if err := spec.Load(); err != nil {
 		return fmt.Errorf("cannot load spec: %w", err)
 	}
 
 	specLock := vending.NewSpecLock(c.preset)
-	err = specLock.Load()
-	if err != nil {
+	if err := specLock.Load(); err != nil {
 		return fmt.Errorf("cannot load speclock: %w", err)
 	}
 
@@ -90,19 +88,16 @@ func (c *Controller) Install() error {
 		color.MagentaString(cacheDir),
 	)
 
-	ins := installer.New(c.cacheManager, spec, specLock)
-	err = ins.Install()
-	if err != nil {
+	ins := installer.New(c.cache, spec, specLock)
+	if err := ins.Install(); err != nil {
 		return fmt.Errorf("cannot install: %w", err)
 	}
 
-	err = spec.Save()
-	if err != nil {
+	if err := spec.Save(); err != nil {
 		return fmt.Errorf("cannot save spec: %w", err)
 	}
 
-	err = specLock.Save()
-	if err != nil {
+	if err := specLock.Save(); err != nil {
 		return fmt.Errorf("cannot save speclock: %w", err)
 	}
 
@@ -114,21 +109,19 @@ func (c *Controller) Install() error {
 // branch, this updates the lockfile with the locked references for each
 // dependency.
 func (c *Controller) Update() error {
-	lock, err := c.cacheManager.LockCache()
+	lock, err := c.cache.Lock()
 	if err != nil {
 		return fmt.Errorf("cannot lock cache: %w", err)
 	}
 	defer lock.Release()
 
 	spec := vending.NewSpec(c.preset)
-	err = spec.Load()
-	if err != nil {
+	if err := spec.Load(); err != nil {
 		return fmt.Errorf("cannot load spec: %w", err)
 	}
 
 	specLock := vending.NewSpecLock(c.preset)
-	err = specLock.Load()
-	if err != nil {
+	if err := specLock.Load(); err != nil {
 		return fmt.Errorf("cannot load speclock: %w", err)
 	}
 
@@ -137,19 +130,16 @@ func (c *Controller) Update() error {
 		color.MagentaString(cacheDir),
 	)
 
-	ins := installer.New(c.cacheManager, spec, specLock)
-	err = ins.Update()
-	if err != nil {
+	ins := installer.New(c.cache, spec, specLock)
+	if err := ins.Update(); err != nil {
 		return fmt.Errorf("cannot update: %w", err)
 	}
 
-	err = spec.Save()
-	if err != nil {
+	if err := spec.Save(); err != nil {
 		return fmt.Errorf("cannot save spec: %w", err)
 	}
 
-	err = specLock.Save()
-	if err != nil {
+	if err := specLock.Save(); err != nil {
 		return fmt.Errorf("cannot save speclock: %w", err)
 	}
 
@@ -160,8 +150,7 @@ func (c *Controller) Update() error {
 // AddDependency adds a new dependency into the spec file.
 func (c *Controller) AddDependency(url, branch string, filters *vending.Filters) error {
 	spec := vending.NewSpec(c.preset)
-	err := spec.Load()
-	if err != nil {
+	if err := spec.Load(); err != nil {
 		return fmt.Errorf("cannot load spec: %w", err)
 	}
 
@@ -170,8 +159,7 @@ func (c *Controller) AddDependency(url, branch string, filters *vending.Filters)
 
 	spec.AddDependency(dep)
 
-	err = spec.Save()
-	if err != nil {
+	if err := spec.Save(); err != nil {
 		return fmt.Errorf("cannot save spec: %w", err)
 	}
 
@@ -185,8 +173,7 @@ func (c *Controller) AddDependency(url, branch string, filters *vending.Filters)
 // CleanCache performs a reset of the repository cache, once cleaned, the
 // repositories of the dependencies will have to be cloned again.
 func (c *Controller) CleanCache() error {
-	err := c.cacheManager.Clean()
-	if err != nil {
+	if err := c.cache.Reset(); err != nil {
 		return fmt.Errorf("cannot clean cache: %w", err)
 	}
 

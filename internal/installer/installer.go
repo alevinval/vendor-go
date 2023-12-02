@@ -12,16 +12,16 @@ import (
 )
 
 type Installer struct {
-	spec         *vending.Spec
-	specLock     *vending.SpecLock
-	cacheManager *cache.Manager
+	spec     *vending.Spec
+	specLock *vending.SpecLock
+	cache    *cache.Cache
 }
 
-func New(cacheManager *cache.Manager, spec *vending.Spec, specLock *vending.SpecLock) *Installer {
+func New(cache *cache.Cache, spec *vending.Spec, specLock *vending.SpecLock) *Installer {
 	return &Installer{
 		spec,
 		specLock,
-		cacheManager,
+		cache,
 	}
 }
 
@@ -89,7 +89,7 @@ func (in *Installer) runInBackground(
 ) {
 	defer wg.Done()
 
-	repo, err := in.cacheManager.GetRepository(dep)
+	repo, err := in.cache.GetRepository(dep)
 	if err != nil {
 		errors <- fmt.Errorf("cannot complete action: %w", err)
 		return
