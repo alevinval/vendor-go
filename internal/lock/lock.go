@@ -8,13 +8,19 @@ import (
 	"github.com/rogpeppe/go-internal/lockedfile"
 )
 
+// Lock is used to ensure only one agent has permission to do certain operations.
+// It relies on creating files
 type Lock struct {
 	file   *lockedfile.File
 	path   string
 	warn   string
 	period time.Duration
+
+	acquired bool
 }
 
+// New returns a Lock instance, it does not try to acquire the lock yet, so no
+// file will be created until Acquire() is called.
 func New(path string) *Lock {
 	return &Lock{
 		path:   path,
@@ -22,59 +28,78 @@ func New(path string) *Lock {
 	}
 }
 
-func (l *Lock) Acquire() (err error) {
-	ch, errCh := createLock(l.path)
-	l.file, err = l.doPoll(ch, errCh)
-	return
-}
-
-func (l *Lock) Release() error {
-	return l.file.Close()
-}
-
+// WithWarn configures the warning message that will be printed on slow lock acquisition.
 func (l *Lock) WithWarn(warn string) *Lock {
 	l.warn = warn
 	return l
 }
 
+// WithPeriod configures the polling period during lock acquisition, for purposes of
+// printing the warning message.
 func (l *Lock) WithPeriod(period time.Duration) *Lock {
 	l.period = period
 	return l
 }
 
-func (l *Lock) doPoll(
-	ch <-chan *lockedfile.File,
-	errCh <-chan error,
+// Acquire attempts to lock the file. This operation blocks as long as needed
+// until it can be acquired.
+func (l *Lock) Acquire() (err error) {
+	if l.file, err = l.acquireLock(); err != nil {
+		return fmt.Errorf("cannot create lockfile: %w", err)
+	} else {
+		l.acquired = true
+		return nil
+	}
+}
+
+// Release the lock that was acquired.
+func (l *Lock) Release() error {
+	if !l.acquired {
+		panic("attempted to release a lock that was never acquired")
+	}
+	return l.file.Close()
+}
+
+// acquireLock creates the lockfile in a go-routine and waits for the process to complete.
+// If the process takes too long and warning is enabled, it will print a warning message.
+func (l *Lock) acquireLock() (*lockedfile.File, error) {
+	fileCh := make(chan *lockedfile.File)
+	errCh := make(chan error)
+	go createLockFile(l.path, fileCh, errCh)
+	return waitForAcquire(fileCh, errCh, l.period, l.warn)
+}
+
+// waitForAcquire polls the channel and displays a warning message in case the lock
+// operation takes longer than expected.
+func waitForAcquire(
+	fileIn <-chan *lockedfile.File,
+	errIn <-chan error,
+	period time.Duration,
+	warnMsg string,
 ) (*lockedfile.File, error) {
-	warn := l.warn != ""
+	warn := warnMsg != ""
 	for {
 		select {
-		case <-time.After(l.period):
+		case <-time.After(period):
 			if warn {
-				log.S().Warnf(l.warn)
+				log.S().Warnf(warnMsg)
 				warn = false
 			}
-		case lock, ok := <-ch:
-			if ok {
-				return lock, nil
-			} else {
-				return nil, fmt.Errorf("cannot create lock: %w", <-errCh)
-			}
+		case e := <-errIn:
+			return nil, e
+		case lock := <-fileIn:
+			return lock, nil
 		}
 	}
 }
 
-func createLock(path string) (<-chan *lockedfile.File, <-chan error) {
-	ch := make(chan *lockedfile.File)
-	errCh := make(chan error)
-	go func() {
-		lock, err := lockedfile.Create(path)
-		if err != nil {
-			close(ch)
-			errCh <- err
-			return
-		}
-		ch <- lock
-	}()
-	return ch, errCh
+// createLockFile creates the lockfile and sends it to the output channel. This is done
+// so we can poll the channel and show a warning message, rather than blocking indefinetely
+// in case the lock is already acquired by someone else.
+func createLockFile(path string, fileOut chan *lockedfile.File, errOut chan error) {
+	if file, err := lockedfile.Create(path); err != nil {
+		errOut <- err
+	} else {
+		fileOut <- file
+	}
 }
