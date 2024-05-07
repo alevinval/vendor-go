@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/alevinval/vendor-go/pkg/log"
+	"github.com/fatih/color"
 	"gopkg.in/yaml.v3"
 )
 
@@ -91,6 +92,9 @@ func (s *Spec) applyPreset(preset Preset) {
 
 	if s.Version < VERSION {
 		s.Version = VERSION
+	} else if s.Version > VERSION {
+		log.S().Warnf("%s this project uses vending@%s (currently installed vending@%s)",
+			color.YellowString("[WARNING]"), color.GreenString(s.Version), color.RedString(VERSION))
 	}
 
 	s.Filters.ApplyPreset(preset)
