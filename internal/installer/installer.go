@@ -127,5 +127,10 @@ func installFunc(installer *dependencyInstaller) (*vending.DependencyLock, error
 }
 
 func updateFunc(installer *dependencyInstaller) (*vending.DependencyLock, error) {
-	return installer.Update()
+	if installer.dep.Pinned {
+		log.S().Infof("%s update for pinned dependency %s", color.RedString("skipping"), color.YellowString(installer.dep.URL))
+		return installer.Install()
+	} else {
+		return installer.Update()
+	}
 }

@@ -6,6 +6,7 @@ type Dependency struct {
 	URL     string   `yaml:"url"`
 	Branch  string   `yaml:"branch"`
 	Filters *Filters `yaml:",inline"`
+	Pinned  bool     `yaml:"pinned,omitempty"`
 }
 
 // DependencyLock holds relevant information of a dependency that has been
