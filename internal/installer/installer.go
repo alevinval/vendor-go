@@ -77,6 +77,7 @@ func (in *Installer) runInParallel(action actionFunc) error {
 		n--
 	}
 
+	in.specLock.Prune(in.spec)
 	return nil
 }
 

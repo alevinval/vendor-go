@@ -38,6 +38,17 @@ func (s *SpecLock) AddDependencyLock(lock *DependencyLock) {
 	}
 }
 
+func (s *SpecLock) Prune(spec *Spec) {
+	pruned := []*DependencyLock{}
+	for _, dep := range spec.Deps {
+		lockedDep, found := s.FindByURL(dep.URL)
+		if found {
+			pruned = append(pruned, lockedDep)
+		}
+	}
+	s.Deps = pruned
+}
+
 // FindByURL finds a DependencyLock by URL.
 func (s *SpecLock) FindByURL(url string) (*DependencyLock, bool) {
 	for _, dep := range s.Deps {

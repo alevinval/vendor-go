@@ -45,7 +45,7 @@ func (g Git) Clone(url, branch, path string) error {
 	}
 	_, err := git.PlainClone(path, false, cloneOpts)
 	if err != nil {
-		return fmt.Errorf("cannot clone: %w", err)
+		return fmt.Errorf("cannot clone %s: %w", url, err)
 	}
 
 	return nil
